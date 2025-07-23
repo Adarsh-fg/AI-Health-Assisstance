@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Exercise Library{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="page-header">
+        <h2 class="page-title"><i class="fas fa-dumbbell"></i> Exercise Library</h2>
+        <a href="{{ url_for('exercise_log') }}" class="btn"><i class="fas fa-history"></i> View Log</a>
+    </div>
+    <p>A collection of fundamental exercises to help you stay active and build strength. Calorie estimates are based on your weight of <strong>{{ user_weight }} kg</strong>. Please <a href="{{ url_for('settings') }}">update your profile</a> for accuracy.</p>
+</div>
+
+<div class="exercise-grid">
+    {% for ex in exercises %}
+    <div class="exercise-card card" data-name="{{ ex.name }}" data-met="{{ ex.met }}" data-weight="{{ user_weight }}">
+        <h3>{{ ex.name }}</h3>
+        <p>{{ ex.desc }}</p>
+        <div class="exercise-video">
+            <a href="https://www.youtube.com/watch?v={{ ex.video_id }}" target="_blank" class="btn-video">
+                <i class="fab fa-youtube"></i> Watch Tutorial
+            </a>
+        </div>
+        <div class="timer-container">
+            <div class="timer-display">00:00</div>
+            <div class="timer-controls">
+                <button class="btn-timer start"><i class="fas fa-play"></i></button>
+                <button class="btn-timer stop"><i class="fas fa-pause"></i></button>
+                <button class="btn-timer reset"><i class="fas fa-redo"></i></button>
+                <button class="btn-timer save" disabled><i class="fas fa-save"></i></button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+    .exercise-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+    .exercise-card { display: flex; flex-direction: column; gap: 1rem; padding: 1.5rem; }
+    .exercise-card h3 { color: var(--primary-color); margin-bottom: 0; }
+    .exercise-video { margin-top: auto; }
+    .btn-video { display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; color: #FF0000; font-weight: 500; padding: 0.5rem 1rem; border: 1px solid #FF0000; border-radius: 8px; transition: all 0.2s ease; }
+    .btn-video:hover { background-color: #FF0000; color: white; }
+    .timer-container { background-color: var(--background-color); padding: 1rem; border-radius: 8px; text-align: center; border: 1px solid var(--border-color); }
+    .timer-display { font-size: 2.5rem; font-weight: 600; color: var(--primary-dark); margin-bottom: 1rem; }
+    .timer-controls { display: flex; justify-content: center; gap: 1rem; }
+    .btn-timer { background: none; border: 2px solid; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; transition: all 0.2s ease; font-size: 1rem; }
+    .btn-timer.start { border-color: var(--primary-color); color: var(--primary-color); }
+    .btn-timer.start:hover { background-color: var(--primary-color); color: white; }
+    .btn-timer.stop { border-color: var(--warning-color); color: var(--warning-color); }
+    .btn-timer.stop:hover { background-color: var(--warning-color); color: white; }
+    .btn-timer.reset { border-color: var(--secondary-color); color: var(--secondary-color); }
+    .btn-timer.reset:hover { background-color: var(--secondary-color); color: white; }
+    .btn-timer.save { border-color: var(--success-color); color: var(--success-color); }
+    .btn-timer.save:hover:not(:disabled) { background-color: var(--success-color); color: white; }
+    .btn-timer:disabled { cursor: not-allowed; opacity: 0.5; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.exercise-card').forEach(card => {
+        const startBtn = card.querySelector('.start');
+        const stopBtn = card.querySelector('.stop');
+        const resetBtn = card.querySelector('.reset');
+        const saveBtn = card.querySelector('.save');
+        const display = card.querySelector('.timer-display');
+
+        let timer;
+        let seconds = 0;
+
+        function updateDisplay() {
+            const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const secs = (seconds % 60).toString().padStart(2, '0');
+            display.textContent = `${mins}:${secs}`;
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (timer) return;
+            saveBtn.disabled = true;
+            timer = setInterval(() => {
+                seconds++;
+                updateDisplay();
+            }, 1000);
+        });
+
+        stopBtn.addEventListener('click', () => {
+            clearInterval(timer);
+            timer = null;
+            if (seconds > 0) {
+                saveBtn.disabled = false;
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            clearInterval(timer);
+            timer = null;
+            seconds = 0;
+            saveBtn.disabled = true;
+            updateDisplay();
+        });
+
+        saveBtn.addEventListener('click', async () => {
+            const exerciseName = card.dataset.name;
+            const met = parseFloat(card.dataset.met);
+            const weightKg = parseFloat(card.dataset.weight);
+            
+            // Calorie calculation: (MET * 3.5 * weight_in_kg) / 200 * duration_in_minutes
+            const caloriesBurned = (met * 3.5 * weightKg) / 200 * (seconds / 60);
+
+            try {
+                const response = await fetch('/api/log-exercise', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        exerciseName: exerciseName,
+                        duration: seconds,
+                        calories: caloriesBurned
+                    })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast(`${exerciseName} workout saved!`, 'success');
+                    resetBtn.click(); // Reset the timer after saving
+                } else {
+                    showToast('Failed to save workout.', 'error');
+                }
+            } catch (err) {
+                showToast('Network error. Could not save workout.', 'error');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

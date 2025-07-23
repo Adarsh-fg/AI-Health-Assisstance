@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Mental Health Resources{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="page-title"><i class="fas fa-book-heart"></i> Mental Health Resources</h2>
+    <p>Explore these curated articles, tools, and organizations for reliable information and support. Remember, this is not a substitute for professional medical advice.</p>
+</div>
+
+<div class="resources-grid">
+    <!-- Category: Understanding Anxiety -->
+    <div class="card resource-category">
+        <h3>Understanding Anxiety</h3>
+        <ul>
+            <li><a href="https://www.nimh.nih.gov/health/topics/anxiety-disorders" target="_blank">Anxiety Disorders - NIMH</a></li>
+            <li><a href="https://adaa.org/understanding-anxiety" target="_blank">Understanding Anxiety - ADAA</a></li>
+            <li><a href="https://www.youtube.com/watch?v=O-6f5wQXSu8" target="_blank">What is Anxiety? (Video)</a></li>
+        </ul>
+    </div>
+
+    <!-- Category: Coping with Stress -->
+    <div class="card resource-category">
+        <h3>Coping with Stress</h3>
+        <ul>
+            <li><a href="https://www.apa.org/topics/stress/management" target="_blank">Stress Management - American Psychological Association</a></li>
+            <li><a href="https://www.helpguide.org/articles/stress/stress-management.htm" target="_blank">Stress Management Techniques - HelpGuide</a></li>
+            <li><a href="https://www.youtube.com/watch?v=v-tYg2CgVvQ" target="_blank">How to Make Stress Your Friend (TED Talk)</a></li>
+        </ul>
+    </div>
+
+    <!-- Category: Mindfulness & Meditation -->
+    <div class="card resource-category">
+        <h3>Mindfulness & Meditation</h3>
+        <ul>
+            <li><a href="https://www.mindful.org/what-is-mindfulness/" target="_blank">What is Mindfulness? - Mindful.org</a></li>
+            <li><a href="https://palousemindfulness.com/" target="_blank">Free Online MBSR Course</a></li>
+            <li><a href="https://www.youtube.com/watch?v=O-6f5wQXSu8" target="_blank">10-Minute Guided Meditation for Beginners (Video)</a></li>
+        </ul>
+    </div>
+
+    <!-- Category: When to Seek Help -->
+    <div class="card resource-category">
+        <h3>When to Seek Help</h3>
+        <ul>
+            <li><a href="https://www.nimh.nih.gov/health/find-help" target="_blank">Find Help for Mental Illnesses - NIMH</a></li>
+            <li><a href="https://www.nami.org/help" target="_blank">Getting Help - NAMI</a></li>
+            <li><a href="https://www.psychologytoday.com/us/basics/therapy" target="_blank">How to Find a Therapist - Psychology Today</a></li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .resources-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    .resource-category h3 {
+        color: var(--primary-color);
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    body.dark-theme .resource-category h3 {
+        color: var(--accent-color);
+        border-bottom-color: var(--border-color);
+    }
+    .resource-category ul {
+        list-style-type: none;
+        padding: 0;
+    }
+    .resource-category li {
+        margin-bottom: 0.75rem;
+    }
+    .resource-category a {
+        color: var(--primary-dark);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+    body.dark-theme .resource-category a {
+        color: var(--primary-color);
+    }
+    .resource-category a:hover {
+        text-decoration: underline;
+        color: var(--primary-color);
+    }
+</style>
+{% endblock %}

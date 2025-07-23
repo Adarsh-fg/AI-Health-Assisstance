@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Coloring Book{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="page-title"><i class="fas fa-palette"></i> Mindful Coloring</h2>
+    <p>Relax and express your creativity. Select a color, choose a mandala, and click on a section to fill it in.</p>
+</div>
+
+<div class="coloring-container">
+    <!-- Updated Controls: Palette and New Mandala Button -->
+    <div class="controls-wrapper">
+        <div id="color-palette">
+            <div class="color-box active" style="background-color: #a78bfa;"></div>
+            <div class="color-box" style="background-color: #f472b6;"></div>
+            <div class="color-box" style="background-color: #60a5fa;"></div>
+            <div class="color-box" style="background-color: #4ade80;"></div>
+            <div class="color-box" style="background-color: #facc15;"></div>
+            <div class="color-box" style="background-color: #fb923c;"></div>
+            <div class="color-box" style="background-color: #e2e8f0;"></div>
+            <div class="color-box" style="background-color: #ffffff;"></div>
+        </div>
+        <button id="new-mandala-btn" class="tool-btn"><i class="fas fa-sync-alt"></i> New Mandala</button>
+    </div>
+
+    <!-- This container will be dynamically filled by JavaScript -->
+    <div id="mandala-container"></div>
+</div>
+
+<!-- START: HIDDEN MANDALA TEMPLATES -->
+<!-- We store our different SVGs here, hidden from view until needed -->
+<template id="mandala-1">
+    <!-- Royalty-free Mandala SVG from: https://freesvg.org/vector-mandala -->
+    <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+        <g id="mandala-art" fill="#fff" stroke="#334155" stroke-width="1.5">
+            <path d="M 250.00,250.00 m -225.00,0.00 a 225.00,225.00 0 1 1 450.00,0.00 a 225.00,225.00 0 1 1 -450.00,0.00"/>
+            <path d="M 250.00,250.00 m -200.00,0.00 a 200.00,200.00 0 1 1 400.00,0.00 a 200.00,200.00 0 1 1 -400.00,0.00"/>
+            <path d="M 250.00,250.00 m -25.00,0.00 a 25.00,25.00 0 1 1 50.00,0.00 a 25.00,25.00 0 1 1 -50.00,0.00"/>
+            <path d="M 320.71,320.71 A 25.00,25.00 0 1 1 320.71,320.71"/>
+            <path d="M 250.00,250.00 C 291.67,291.67 291.67,291.67 320.71,320.71 C 350.00,350.00 350.00,350.00 350.00,350.00"/>
+            <path d="M 179.29,320.71 A 25.00,25.00 0 1 1 179.29,320.71"/>
+            <path d="M 250.00,250.00 C 208.33,291.67 208.33,291.67 179.29,320.71 C 150.00,350.00 150.00,350.00 150.00,350.00"/>
+            <path d="M 179.29,179.29 A 25.00,25.00 0 1 1 179.29,179.29"/>
+            <path d="M 250.00,250.00 C 208.33,208.33 208.33,208.33 179.29,179.29 C 150.00,150.00 150.00,150.00 150.00,150.00"/>
+            <path d="M 320.71,179.29 A 25.00,25.00 0 1 1 320.71,179.29"/>
+            <path d="M 250.00,250.00 C 291.67,208.33 291.67,208.33 320.71,179.29 C 350.00,150.00 350.00,150.00 350.00,150.00"/>
+            <path d="M 250.00,150.00 A 25.00,25.00 0 1 1 250.00,150.00"/>
+            <path d="M 250.00,250.00 C 250.00,216.67 250.00,216.67 250.00,150.00 C 250.00,83.33 250.00,83.33 250.00,50.00"/>
+            <path d="M 250.00,350.00 A 25.00,25.00 0 1 1 250.00,350.00"/>
+            <path d="M 250.00,250.00 C 250.00,283.33 250.00,283.33 250.00,350.00 C 250.00,416.67 250.00,416.67 250.00,450.00"/>
+            <path d="M 350.00,250.00 A 25.00,25.00 0 1 1 350.00,250.00"/>
+            <path d="M 250.00,250.00 C 283.33,250.00 283.33,250.00 350.00,250.00 C 416.67,250.00 416.67,250.00 450.00,250.00"/>
+            <path d="M 150.00,250.00 A 25.00,25.00 0 1 1 150.00,250.00"/>
+            <path d="M 250.00,250.00 C 216.67,250.00 216.67,250.00 150.00,250.00 C 83.33,250.00 83.33,250.00 50.00,250.00"/>
+            <path d="M 320.71,320.71 A 50.00,50.00 0 0 1 250.00,350.00"/>
+            <path d="M 179.29,320.71 A 50.00,50.00 0 0 1 150.00,250.00"/>
+            <path d="M 179.29,179.29 A 50.00,50.00 0 0 1 250.00,150.00"/>
+            <path d="M 320.71,179.29 A 50.00,50.00 0 0 1 350.00,250.00"/>
+        </g>
+    </svg>
+</template>
+
+<template id="mandala-2">
+    <!-- Royalty-free Mandala SVG from: https://freesvg.org/1529341492 -->
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <g id="mandala-art" fill="#fff" stroke="#334155" stroke-width="0.3">
+            <path d="M50 0a50 50 0 100 100A50 50 0 0050 0zm0 3a47 47 0 110 94A47 47 0 0150 3z" />
+            <path d="M50 8.4a41.6 41.6 0 100 83.2 41.6 41.6 0 000-83.2zm0 3A38.6 38.6 0 1150 88.6 38.6 38.6 0 0150 11.4z" />
+            <path d="M50 19.8a30.2 30.2 0 100 60.4 30.2 30.2 0 000-60.4zm0 3a27.2 27.2 0 110 54.4 27.2 27.2 0 010-54.4z" />
+            <path d="M50 25a25 25 0 100 50 25 25 0 000-50zm-.4 3a22 22 0 11.8 44 22 22 0 01-.8-44z" />
+            <path d="M50 30.2a19.8 19.8 0 100 39.6 19.8 19.8 0 000-39.6zm0 3a16.8 16.8 0 110 33.6 16.8 16.8 0 010-33.6z" />
+            <path d="M50 35.8A14.2 14.2 0 1050 64.2 14.2 14.2 0 0050 35.8zm0 3a11.2 11.2 0 110 22.4 11.2 11.2 0 010-22.4z" />
+            <path d="M50 41a9 9 0 100 18 9 9 0 000-18zm0 3a6 6 0 110 12 6 6 0 010-12z" />
+            <g>
+                <path d="M50 11.4L40.6 28h18.8z" />
+                <path d="M50 88.6L40.6 72h18.8z" />
+                <path d="M88.6 50l-16.6 9.4v-18.8z" />
+                <path d="M11.4 50l16.6 9.4v-18.8z" />
+                <path d="M28 40.6L11.4 50l16.6 9.4z" />
+                <path d="M72 40.6L88.6 50 72 59.4z" />
+                <path d="M59.4 28L50 11.4 40.6 28z" />
+                <path d="M59.4 72L50 88.6 40.6 72z" />
+            </g>
+        </g>
+    </svg>
+</template>
+
+<template id="mandala-3">
+    <!-- Royalty-free Mandala SVG from: https://www.svgrepo.com/svg/374828/mandala -->
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <g id="mandala-art" fill="#fff" stroke="#334155" stroke-width="0.2">
+            <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM5.72 5.72a7 7 0 1 1 9.9 9.9 7 7 0 0 1-9.9-9.9z" />
+            <path d="M12 19a7 7 0 1 0 0-14 7 7 0 0 0 0 14zm-4-7a4 4 0 1 1 8 0 4 4 0 0 1-8 0z" />
+            <path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm0-1a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" />
+            <path d="M12 13.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z" />
+            <path d="M12 21v-2m0-14V3M3 12h2m14 0h-2" />
+            <path d="m18 18-1-1M7 7l-1-1m11 0-1 1M7 17l-1 1" />
+        </g>
+    </svg>
+</template>
+<!-- END: HIDDEN MANDALA TEMPLATES -->
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .coloring-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+    }
+    .controls-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    #color-palette {
+        display: flex;
+        gap: 1rem;
+        background-color: var(--background-color);
+        padding: 0.75rem;
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+    }
+    .color-box {
+        width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+        border: 3px solid transparent; transition: all 0.2s ease;
+    }
+    .color-box:hover { transform: scale(1.1); }
+    .color-box.active { border-color: var(--primary-color); transform: scale(1.15); }
+
+    .tool-btn {
+        background-color: white; border: 1px solid var(--border-color);
+        padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; font-weight: 500;
+        transition: all 0.2s ease; display: flex; align-items: center; gap: 0.5rem;
+    }
+    body.dark-theme .tool-btn { background-color: #334155; }
+    .tool-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
+    
+    #mandala-container { max-width: 500px; width: 100%; }
+    #mandala-container svg { width: 100%; height: auto; }
+    #mandala-art path { cursor: pointer; transition: fill 0.2s ease; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const palette = document.getElementById('color-palette');
+    const mandalaContainer = document.getElementById('mandala-container');
+    const newMandalaBtn = document.getElementById('new-mandala-btn');
+    
+    let selectedColor = '#a78bfa'; // Default active color
+    const mandalaTemplateIds = ['mandala-1', 'mandala-2', 'mandala-3'];
+
+    function addColoringListeners() {
+        // Find the paths within the newly added SVG
+        const mandalaPaths = mandalaContainer.querySelectorAll('#mandala-art path');
+        mandalaPaths.forEach(path => {
+            path.addEventListener('click', () => {
+                if (selectedColor) {
+                    path.style.fill = selectedColor;
+                }
+            });
+        });
+    }
+
+    function loadRandomMandala() {
+        // Clear the container of any previous mandala
+        mandalaContainer.innerHTML = '';
+        
+        // Pick a random ID from our list
+        const randomTemplateId = mandalaTemplateIds[Math.floor(Math.random() * mandalaTemplateIds.length)];
+        const template = document.getElementById(randomTemplateId);
+        
+        // Clone the content of the template (the SVG)
+        const clone = template.content.cloneNode(true);
+        
+        // Append the new SVG to our container
+        mandalaContainer.appendChild(clone);
+        
+        // IMPORTANT: Re-apply the event listeners to the new paths
+        addColoringListeners();
+    }
+
+    // Event listener for the color palette
+    palette.addEventListener('click', (e) => {
+        if (e.target.classList.contains('color-box')) {
+            palette.querySelector('.active').classList.remove('active');
+            e.target.classList.add('active');
+            selectedColor = e.target.style.backgroundColor;
+        }
+    });
+
+    // Event listener for the "New Mandala" button
+    newMandalaBtn.addEventListener('click', loadRandomMandala);
+
+    // Initial load: display a random mandala when the page opens
+    loadRandomMandala();
+});
+</script>
+{% endblock %}

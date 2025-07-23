@@ -1,0 +1,356 @@
+{% extends "base.html" %}
+
+{% block title %}Medications & Reminders{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="card">
+        <h2 id="medFormTitle">Add Medication</h2>
+        <form id="medicationForm" class="form-group">
+            <div class="form-group">
+                <label for="medName">Medication Name</label>
+                <input type="text" id="medName" required>
+            </div>
+            <div class="form-group">
+                <label for="dosage">Dosage</label>
+                <input type="text" id="dosage" required>
+            </div>
+            <div class="form-group">
+                <label for="frequency">Frequency</label>
+                <select id="frequency" required>
+                    <option value="Daily">Daily</option>
+                    <option value="Twice Daily">Twice Daily</option>
+                    <option value="Three Times Daily">Three Times Daily</option>
+                    <option value="Weekly">Weekly</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="startDate">Start Date</label>
+                <input type="date" id="startDate" required>
+            </div>
+            <div class="form-group">
+                <label for="endDate">End Date (if applicable)</label>
+                <input type="date" id="endDate">
+            </div>
+            <div id="medFormButtons">
+                <button type="submit" class="btn">Add Medication</button>
+            </div>
+        </form>
+        <div class="medication-list" style="margin-top: 2rem;">
+            <h3>Your Current Medications</h3>
+            <div id="medicationsList">
+                {% for med in medications %}
+                <div class="medication-item" id="med-{{ med.id }}"
+                     data-id="{{ med.id }}"
+                     data-name="{{ med.name }}"
+                     data-dosage="{{ med.dosage }}"
+                     data-frequency="{{ med.frequency }}"
+                     data-start-date="{{ med.start_date }}"
+                     data-end-date="{{ med.end_date or '' }}">
+                    <h4>{{ med.name }}</h4>
+                    <p><strong>Dosage:</strong> {{ med.dosage }}</p>
+                    <p><strong>Frequency:</strong> {{ med.frequency }}</p>
+                    <p><strong>Start Date:</strong> {{ med.start_date }}</p>
+                    {% if med.end_date %}<p><strong>End Date:</strong> {{ med.end_date }}</p>{% endif %}
+                    <div class="item-actions">
+                        <button class="btn-action edit-med" data-id="{{ med.id }}">Edit</button>
+                        <button class="btn-action delete-med" data-id="{{ med.id }}">Delete</button>
+                    </div>
+                </div>
+                {% else %}
+                <p>No medications added yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 id="reminderFormTitle">Set Pill Reminder</h2>
+        <form id="reminderForm" class="form-group">
+            <div class="form-group">
+                <label for="reminderMedName">Medication Name</label>
+                <input type="text" id="reminderMedName" required>
+            </div>
+            <div class="form-group">
+                <label for="reminderTime">Reminder Time</label>
+                <input type="time" id="reminderTime" required>
+            </div>
+            <div class="form-group">
+                <label for="reminderDays">Days</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" value="monday"> Mon</label>
+                    <label><input type="checkbox" value="tuesday"> Tue</label>
+                    <label><input type="checkbox" value="wednesday"> Wed</label>
+                    <label><input type="checkbox" value="thursday"> Thu</label>
+                    <label><input type="checkbox" value="friday"> Fri</label>
+                    <label><input type="checkbox" value="saturday"> Sat</label>
+                    <label><input type="checkbox" value="sunday"> Sun</label>
+                </div>
+            </div>
+            <div id="reminderFormButtons">
+                <button type="submit" class="btn">Set Reminder</button>
+            </div>
+        </form>
+        <div class="reminder-list" style="margin-top: 2rem;">
+            <h3>Active Reminders</h3>
+            <div id="activeReminders">
+                {% for reminder in reminders %}
+                <div class="reminder-item" id="reminder-{{ reminder.id }}"
+                     data-id="{{ reminder.id }}"
+                     data-med-name="{{ reminder.med_name }}"
+                     data-time="{{ reminder.time }}"
+                     data-days="{{ reminder.days | join(',') }}">
+                    <h4>{{ reminder.med_name }}</h4>
+                    <p><strong>Time:</strong> {{ reminder.time }}</p>
+                    <p><strong>Days:</strong> {{ reminder.days | join(', ') }}</p>
+                    <div class="item-actions">
+                        <button class="btn-action edit-reminder" data-id="{{ reminder.id }}">Edit</button>
+                        <button class="btn-action delete-reminder" data-id="{{ reminder.id }}">Delete</button>
+                    </div>
+                </div>
+                {% else %}
+                <p>No active reminders.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.medication-list, .reminder-list {
+    background-color: #f8fafc;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.medication-item, .reminder-item {
+    background: white;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    position: relative;
+    padding-right: 6rem;
+}
+
+.item-actions {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-action {
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--border-color);
+    background-color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
+}
+
+.btn-action.edit-med, .btn-action.edit-reminder {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+.btn-action.edit-med:hover, .btn-action.edit-reminder:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+.btn-action.delete-med, .btn-action.delete-reminder {
+    color: var(--error-color);
+    border-color: var(--error-color);
+}
+.btn-action.delete-med:hover, .btn-action.delete-reminder:hover {
+    background-color: var(--error-color);
+    color: white;
+}
+
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 0.5rem;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+@media (max-width: 992px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- Medication Form ---
+    const medForm = document.getElementById('medicationForm');
+    const medFormTitle = document.getElementById('medFormTitle');
+    const medFormButtons = document.getElementById('medFormButtons');
+
+    function resetMedForm() {
+        medForm.reset();
+        delete medForm.dataset.editingId;
+        medFormTitle.textContent = 'Add Medication';
+        medFormButtons.innerHTML = '<button type="submit" class="btn">Add Medication</button>';
+        medForm.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    medForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const medId = medForm.dataset.editingId;
+        const isEditing = !!medId;
+        
+        const formData = {
+            name: document.getElementById('medName').value,
+            dosage: document.getElementById('dosage').value,
+            frequency: document.getElementById('frequency').value,
+            startDate: document.getElementById('startDate').value,
+            endDate: document.getElementById('endDate').value || null,
+        };
+
+        const url = isEditing ? `/api/medications/${medId}` : '/api/medications';
+        const method = isEditing ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+            showToast(`Medication ${isEditing ? 'updated' : 'added'}.`, 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast('Failed to save medication.', 'error');
+        }
+    });
+
+    // --- Reminder Form ---
+    const reminderForm = document.getElementById('reminderForm');
+    const reminderFormTitle = document.getElementById('reminderFormTitle');
+    const reminderFormButtons = document.getElementById('reminderFormButtons');
+
+    function resetReminderForm() {
+        reminderForm.reset();
+        delete reminderForm.dataset.editingId;
+        reminderFormTitle.textContent = 'Set Pill Reminder';
+        reminderFormButtons.innerHTML = '<button type="submit" class="btn">Set Reminder</button>';
+        reminderForm.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    reminderForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const reminderId = reminderForm.dataset.editingId;
+        const isEditing = !!reminderId;
+
+        const selectedDays = Array.from(reminderForm.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+        const formData = {
+            medName: document.getElementById('reminderMedName').value,
+            time: document.getElementById('reminderTime').value,
+            days: selectedDays
+        };
+
+        const url = isEditing ? `/api/reminders/${reminderId}` : '/api/reminders';
+        const method = isEditing ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+            showToast(`Reminder ${isEditing ? 'updated' : 'set'}.`, 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast('Failed to save reminder.', 'error');
+        }
+    });
+    
+    // --- Event Delegation for Buttons ---
+    document.querySelector('.dashboard-container').addEventListener('click', async (e) => {
+        const target = e.target;
+        const id = target.dataset.id;
+        if (!id) return;
+
+        // -- Medication Actions --
+        if (target.classList.contains('delete-med')) {
+            if (confirm('Are you sure you want to delete this medication?')) {
+                const response = await fetch(`/api/medications/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showToast('Medication deleted.', 'success');
+                    document.getElementById(`med-${id}`).remove();
+                } else { showToast('Failed to delete.', 'error'); }
+            }
+        }
+        if (target.classList.contains('edit-med')) {
+            const item = document.getElementById(`med-${id}`);
+            medForm.dataset.editingId = id;
+            document.getElementById('medName').value = item.dataset.name;
+            document.getElementById('dosage').value = item.dataset.dosage;
+            document.getElementById('frequency').value = item.dataset.frequency;
+            document.getElementById('startDate').value = item.dataset.startDate;
+            document.getElementById('endDate').value = item.dataset.endDate;
+
+            medFormTitle.textContent = 'Edit Medication';
+            medFormButtons.innerHTML = `
+                <button type="submit" class="btn">Update Medication</button>
+                <button type="button" class="btn" id="cancelMedEdit" style="background-color:var(--secondary-color)">Cancel</button>
+            `;
+            document.getElementById('cancelMedEdit').addEventListener('click', resetMedForm);
+            medForm.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // -- Reminder Actions --
+        if (target.classList.contains('delete-reminder')) {
+            if (confirm('Are you sure you want to delete this reminder?')) {
+                const response = await fetch(`/api/reminders/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showToast('Reminder deleted.', 'success');
+                    document.getElementById(`reminder-${id}`).remove();
+                } else { showToast('Failed to delete.', 'error'); }
+            }
+        }
+        if (target.classList.contains('edit-reminder')) {
+            const item = document.getElementById(`reminder-${id}`);
+            reminderForm.dataset.editingId = id;
+            document.getElementById('reminderMedName').value = item.dataset.medName;
+            document.getElementById('reminderTime').value = item.dataset.time;
+            
+            reminderForm.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            const days = item.dataset.days.split(',');
+            days.forEach(day => {
+                const cb = reminderForm.querySelector(`input[value="${day}"]`);
+                if (cb) cb.checked = true;
+            });
+
+            reminderFormTitle.textContent = 'Edit Reminder';
+            reminderFormButtons.innerHTML = `
+                <button type="submit" class="btn">Update Reminder</button>
+                <button type="button" class="btn" id="cancelReminderEdit" style="background-color:var(--secondary-color)">Cancel</button>
+            `;
+            document.getElementById('cancelReminderEdit').addEventListener('click', resetReminderForm);
+            reminderForm.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    if (Notification.permission !== "granted") {
+        Notification.requestPermission();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Breathing Exercise{% endblock %}
+
+{% block content %}
+<div class="card relax-container">
+    <h2 class="page-title"><i class="fas fa-wind"></i> Guided Breathing</h2>
+    <p>Find a comfortable position and focus on your breath. Follow the animation and prompts to calm your mind.</p>
+    
+    <div class="breathing-circle-container">
+        <div class="breathing-circle" id="breathing-circle"></div>
+        <p class="breathing-text" id="breathing-text">Press Start</p>
+    </div>
+    
+    <div class="relax-controls">
+        <div class="timer-select">
+            <label for="duration">Duration:</label>
+            <select id="duration">
+                <option value="60">1 Minute</option>
+                <option value="180">3 Minutes</option>
+                <option value="300">5 Minutes</option>
+            </select>
+        </div>
+        <button class="btn" id="start-btn"><i class="fas fa-play"></i> Start</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .relax-container { text-align: center; max-width: 600px; margin: 0 auto; }
+    .breathing-circle-container {
+        position: relative;
+        height: 300px;
+        display: grid;
+        place-items: center;
+        margin: 2rem 0;
+    }
+    .breathing-circle {
+        width: 150px;
+        height: 150px;
+        background-image: linear-gradient(135deg, #a5b4fc, #6366f1);
+        border-radius: 50%;
+        transition: transform 4s ease-in-out;
+    }
+    .breathing-circle.grow { transform: scale(2); }
+    .breathing-circle.shrink { transform: scale(1); }
+    .breathing-text {
+        position: absolute;
+        font-size: 1.5rem;
+        font-weight: 500;
+        color: var(--text-color);
+    }
+    body.dark-theme .breathing-text { color: white; }
+    .relax-controls { display: flex; justify-content: center; align-items: center; gap: 2rem; }
+    .timer-select { display: flex; align-items: center; gap: 0.5rem; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const circle = document.getElementById('breathing-circle');
+    const text = document.getElementById('breathing-text');
+    const startBtn = document.getElementById('start-btn');
+    const durationSelect = document.getElementById('duration');
+    let interval;
+
+    function runAnimation() {
+        text.textContent = 'Breathe In...';
+        circle.classList.add('grow');
+        circle.classList.remove('shrink');
+
+        setTimeout(() => {
+            text.textContent = 'Breathe Out...';
+            circle.classList.add('shrink');
+            circle.classList.remove('grow');
+        }, 4000); // 4 seconds to inhale
+    }
+
+    startBtn.addEventListener('click', () => {
+        startBtn.disabled = true;
+        text.textContent = 'Get Ready...';
+        
+        const totalDuration = parseInt(durationSelect.value) * 1000;
+        
+        setTimeout(() => {
+            runAnimation(); // Start the first cycle
+            interval = setInterval(runAnimation, 8000); // Repeat every 8 seconds (4 in, 4 out)
+        }, 2000); // 2 second ready time
+
+        setTimeout(() => {
+            clearInterval(interval);
+            text.textContent = 'Finished. Well done!';
+            circle.classList.remove('grow', 'shrink');
+            startBtn.disabled = false;
+        }, totalDuration + 2000);
+    });
+});
+</script>
+{% endblock %}

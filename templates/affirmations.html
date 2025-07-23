@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Positive Affirmation{% endblock %}
+
+{% block content %}
+<div class="affirmation-container">
+    <div class="affirmation-card card">
+        <i class="fas fa-quote-left quote-icon"></i>
+        <!-- The text is now in a <p> tag with an ID for easy targeting -->
+        <p class="affirmation-text" id="affirmation-text">{{ affirmation }}</p>
+        <i class="fas fa-quote-right quote-icon"></i>
+        <!-- The button has been removed -->
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .affirmation-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 200px);
+        text-align: center;
+    }
+    .affirmation-card {
+        max-width: 600px;
+        padding: 3rem;
+        position: relative;
+    }
+    .affirmation-text {
+        font-size: 1.75rem;
+        font-style: italic;
+        color: var(--primary-dark);
+        line-height: 1.6;
+        /* Start with opacity 0 for the initial fade-in */
+        opacity: 0;
+        /* Add a smooth transition for the fade effect */
+        transition: opacity 0.8s ease-in-out;
+    }
+    /* This class will be toggled by JS to trigger the fade-in */
+    .affirmation-text.fade-in {
+        opacity: 1;
+    }
+    body.dark-theme .affirmation-text {
+        color: var(--accent-color);
+    }
+    .quote-icon {
+        font-size: 1.5rem;
+        color: var(--accent-color);
+        opacity: 0.5;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Get the list of affirmations from the backend
+    // The |safe filter is crucial to correctly parse the JSON string
+    const affirmations = JSON.parse('{{ affirmations_json | safe }}');
+    const affirmationEl = document.getElementById('affirmation-text');
+    let currentAffirmation = affirmationEl.textContent;
+
+    // 2. Function to pick and display a new affirmation
+    function changeAffirmation() {
+        // Fade out the current text
+        affirmationEl.classList.remove('fade-in');
+
+        // Wait for the fade-out to finish before changing the text
+        setTimeout(() => {
+            let newAffirmation;
+            // Make sure the new affirmation isn't the same as the current one
+            do {
+                newAffirmation = affirmations[Math.floor(Math.random() * affirmations.length)];
+            } while (newAffirmation === currentAffirmation);
+            
+            currentAffirmation = newAffirmation;
+            affirmationEl.textContent = currentAffirmation;
+
+            // Fade the new text in
+            affirmationEl.classList.add('fade-in');
+        }, 800); // This should match the CSS transition time
+    }
+
+    // 3. Function to schedule the next change with a random delay
+    function scheduleNextChange() {
+        // Random delay between 5 seconds (5000ms) and 10 seconds (10000ms)
+        const randomDelay = Math.random() * (10000 - 5000) + 5000;
+        
+        setTimeout(() => {
+            changeAffirmation();
+            scheduleNextChange(); // Call itself to create an infinite loop
+        }, randomDelay);
+    }
+
+    // 4. Initial start
+    // Fade in the first affirmation that was loaded with the page
+    setTimeout(() => {
+        affirmationEl.classList.add('fade-in');
+    }, 100);
+
+    // Start the automatic cycle
+    scheduleNextChange();
+});
+</script>
+{% endblock %}

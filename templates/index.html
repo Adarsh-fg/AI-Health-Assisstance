@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="hero-content">
+        <h1>Welcome, {{ session.get('user_name', 'Guest') }}!</h1>
+        <p>Your Personal AI Health Companion, here to help you manage your health, track your progress, and live a healthier life.</p>
+        <a href="#health-tools" class="btn"><i class="fas fa-rocket"></i> Get Started</a>
+    </div>
+</section>
+
+{% if session.get('user_id') %}
+<section id="personal-health">
+    <div class="section-title">
+        <h2>Personal Health Management</h2>
+        <p>Your centralized dashboard for medications, appointments, and health reviews.</p>
+    </div>
+
+    <div class="features-grid">
+        <a href="/medications" class="feature-card-link">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-pills"></i></div>
+                <h3>Medication Management</h3>
+                <p>Track your medications, set reminders, and manage your prescriptions.</p>
+            </div>
+        </a>
+        <a href="/appointments" class="feature-card-link">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
+                <h3>Appointment Tracking</h3>
+                <p>Schedule and manage your medical appointments with ease.</p>
+            </div>
+        </a>
+        <a href="/health-review" class="feature-card-link">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-user-md"></i></div>
+                <h3>Personal Health Review</h3>
+                <p>Get a comprehensive AI-powered analysis of your health profile.</p>
+            </div>
+        </a>
+    </div>
+</section>
+
+<section id="health-improvement">
+    <div class="section-title">
+        <h2>Health Improvement</h2>
+        <p>Tools and plans to help you improve your physical well-being.</p>
+    </div>
+
+    <div class="features-grid">
+        <a href="{{ url_for('exercise') }}" class="feature-card-link"><div class="feature-card"><div class="feature-icon"><i class="fas fa-dumbbell"></i></div><h3>Exercise Library</h3><p>Explore exercises with timers and video tutorials.</p></div></a>
+        <a href="{{ url_for('diet_plan') }}" class="feature-card-link"><div class="feature-card"><div class="feature-icon"><i class="fas fa-utensils"></i></div><h3>Personalized Diet Plan</h3><p>Get an AI-generated diet plan for your health goals.</p></div></a>
+    </div>
+</section>
+
+{% endif %}
+
+<section id="health-tools">
+    <div class="section-title">
+        <h2>Health Tools & Resources</h2>
+        <p>Access our comprehensive health tools and get instant assistance.</p>
+    </div>
+
+    <div class="features-grid">
+        <a href="/symptom" class="feature-card-link"><div class="feature-card"><div class="feature-icon"><i class="fas fa-stethoscope"></i></div><h3>Symptom Checker</h3><p>Get an instant, AI-driven analysis of your symptoms.</p></div></a>
+        <a href="/assistant" class="feature-card-link"><div class="feature-card"><div class="feature-icon"><i class="fas fa-robot"></i></div><h3>Health Assistant</h3><p>Chat with our AI for personalized health advice.</p></div></a>
+        <a href="/health-metrics" class="feature-card-link"><div class="feature-card"><div class="feature-icon"><i class="fas fa-heartbeat"></i></div><h3>Health Metrics</h3><p>Analyze vital signs and health measurements.</p></div></a>
+        <a href="/bmi" class="feature-card-link"><div class="feature-card"><div class="feature-icon"><i class="fas fa-weight"></i></div><h3>BMI Calculator</h3><p>Calculate your BMI and get personalized health advice.</p></div></a>
+    </div>
+</section>
+
+
+
+<section id="health-tips">
+  <div class="section-title">
+    <h2>Health Tips for a Healthy Body</h2>
+    <p>Expert advice and practical tips for maintaining your physical and mental wellbeing.</p>
+  </div>
+
+  <div class="tips-grid">
+    {% for tip in tips %}
+    <a href="{{ tip.link }}" class="tip-card-link" target="_blank">
+      <article class="tip-card">
+        <div class="tip-image"><img src="{{ tip.image }}" alt="{{ tip.title }}"></div>
+        <div class="tip-content">
+          <span class="tip-category">{{ tip.category }}</span>
+          <h3 class="tip-title">{{ tip.title }}</h3>
+        </div>
+      </article>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<footer class="copyright-footer">
+    <p>© 2025 HealthCare-AI. All rights reserved.</p>
+</footer>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        padding: 6rem 2rem;
+        text-align: center;
+        background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=2070&auto=format&fit=crop');
+        background-size: cover;
+        background-position: center;
+        border-radius: 24px;
+        color: white;
+        margin-bottom: 4rem;
+    }
+    .hero-content h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .hero-content p {
+        font-size: 1.25rem;
+        max-width: 700px;
+        margin: 0 auto 2rem;
+        opacity: 0.9;
+    }
+
+    .section-title { text-align: center; margin: 5rem 0 2rem; }
+    .section-title h2 { font-size: 2.25rem; margin-bottom: 0.5rem; color: var(--primary-dark); }
+    .section-title p { color: var(--text-light); max-width: 600px; margin: 0 auto; }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));  
+        gap: 1.5rem;
+        justify-content: center; 
+    }
+    .feature-card-link { text-decoration: none; }
+    .feature-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        height: 100%;
+        opacity: 0;
+        animation: fadeInUp 0.5s ease-out forwards;
+    }
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--card-shadow-hover);
+        border-color: var(--primary-color);
+    }
+    .feature-icon {
+        font-size: 2.5rem;
+        width: 80px;
+        height: 80px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background-image: var(--gradient-primary);
+        color: white;
+        margin-bottom: 1rem;
+        transition: var(--transition);
+    }
+    .feature-card:hover .feature-icon { transform: scale(1.1) rotate(10deg); }
+    .feature-card h3 { color: var(--primary-dark); font-size: 1.3rem; margin-bottom: 0.5rem; }
+    .feature-card p { color: var(--text-light); flex-grow: 1; }
+
+    .tips-grid {
+        display: flex; /* Changed from grid to flex */
+        flex-wrap: wrap; /* Allows items to wrap to new lines */
+        gap: 1.5rem;
+    }
+
+    .tip-card-link {
+        text-decoration: none;
+        flex-grow: 1; /* Allows items to grow to fill space */
+        flex-basis: 300px; /* Sets a minimum/ideal width */
+        display: flex; /* Make the link a flex container for the card inside */
+    }
+
+    .tip-card {
+        background: var(--secondary-color);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--card-shadow);
+        transition: var(--transition);
+        position: relative;
+        height: 350px;
+        display: block;
+        width: 100%; /* Make the card fill the link container */
+    }
+    
+    .tip-card:hover { transform: scale(1.05); box-shadow: var(--card-shadow-hover); }
+    .tip-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    .tip-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+    .tip-card:hover .tip-image img { transform: scale(1.1); }
+    .tip-content {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        padding: 1.5rem;
+        background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+        color: white; z-index: 1;
+    }
+    .tip-category {
+        display: inline-block; padding: 0.25rem 0.75rem; background: rgba(255,255,255,0.2);
+        color: white; border-radius: 15px; font-size: 0.75rem; margin-bottom: 0.75rem;
+        backdrop-filter: blur(5px); font-weight: 500;
+    }
+    .tip-title { font-size: 1.25rem; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    
+    .copyright-footer { color: var(--text-light); padding: 2rem 0; margin-top: 4rem; text-align: center; }
+</style>
+{% endblock %}

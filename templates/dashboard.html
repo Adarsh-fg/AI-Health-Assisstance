@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="page-title"><i class="fas fa-th-large"></i> Health Dashboard</h2>
+    <p>Your personal health overview. Track your progress and stay on top of your goals.</p>
+</div>
+
+<!-- At a Glance Cards -->
+<div class="glance-grid">
+    <div class="card glance-card">
+        <div class="glance-icon" style="background: var(--accent-color);"><i class="fas fa-calendar-check"></i></div>
+        <div class="glance-content">
+            <h4>Next Appointment</h4>
+            {% if next_appointment %}
+                <p><strong>Dr. {{ next_appointment.doctor_name }}</strong> on {{ next_appointment.date }} at {{ next_appointment.time }}</p>
+            {% else %}
+                <p>No upcoming appointments.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card glance-card">
+        <div class="glance-icon" style="background: var(--success-color);"><i class="fas fa-dumbbell"></i></div>
+        <div class="glance-content">
+            <h4>Workouts Logged</h4>
+            <p><strong>{{ total_exercises }}</strong> total sessions recorded.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Main Dashboard Grid -->
+<div class="dashboard-grid">
+    <!-- BMI Card - First Row -->
+    <div class="card dashboard-card bmi-card">
+        <h4><i class="fas fa-weight"></i> Body Mass Index (BMI)</h4>
+        {% if bmi %}
+            <div class="bmi-gauge-container">
+                <canvas id="bmiGauge"></canvas>
+                <div class="bmi-value">{{ "%.1f"|format(bmi) }}</div>
+            </div>
+        {% else %}
+            <div class="no-data">
+                <p>No BMI data available.</p>
+                <a href="{{ url_for('settings') }}" class="btn-small">Add Weight/Height</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Chart Grid - Second Row -->
+<div class="chart-grid">
+    <!-- Weight Trend Card -->
+    <div class="card dashboard-card">
+        <h4><i class="fas fa-chart-line"></i> Weight Trend (kg)</h4>
+        <div class="chart-container">
+            <canvas id="weightChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Exercise Activity Card -->
+    <div class="card dashboard-card">
+        <h4><i class="fas fa-chart-bar"></i> Exercise This Week (Minutes)</h4>
+        <div class="chart-container">
+            <canvas id="exerciseChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .glance-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .glance-card { display: flex; align-items: center; gap: 1.5rem; }
+    .glance-icon {
+        width: 60px; height: 60px; border-radius: 12px; color: white;
+        display: grid; place-items: center; font-size: 1.5rem; flex-shrink: 0;
+    }
+    .glance-content h4 { margin: 0 0 0.25rem; color: var(--text-light); font-size: 1rem; }
+    .glance-content p { margin: 0; font-weight: 600; font-size: 1.1rem; }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    .chart-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .dashboard-card { padding: 1.5rem; }
+    .dashboard-card h4 { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; color: var(--primary-dark); }
+    
+    .bmi-card {
+        max-width: 400px;
+        margin: 0 auto; /* Center the BMI card */
+        width: 100%;
+    }
+    .bmi-gauge-container { position: relative; width: 100%; max-width: 250px; margin: 0 auto; }
+    .bmi-value {
+        position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);
+        font-size: 2.5rem; font-weight: 700; color: var(--primary-dark);
+    }
+    
+    /* Container for charts to enforce aspect ratio */
+    .chart-container {
+        position: relative;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 3 / 2; /* Enforces 3:2 width:height ratio */
+    }
+
+    .no-data { text-align: center; padding: 2rem 0; }
+    .btn-small {
+        font-size: 0.8rem; padding: 0.5rem 1rem; margin-top: 1rem;
+        text-decoration: none; display: inline-block; border-radius: 8px;
+        color: white; background-image: var(--gradient-primary);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Include Chart.js from a CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const bmi = {{ bmi|tojson }};
+    const weightChartData = {{ weight_chart_data|tojson }};
+    const exerciseChartData = {{ exercise_chart_data|tojson }};
+    
+    Chart.defaults.font.family = 'Poppins';
+    Chart.defaults.responsive = true;
+    Chart.defaults.maintainAspectRatio = false;
+
+    // 1. BMI Gauge Chart
+    if (bmi) {
+        const bmiCtx = document.getElementById('bmiGauge').getContext('2d');
+        new Chart(bmiCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Underweight', 'Normal', 'Overweight', 'Obese'],
+                datasets: [{
+                    data: [18.5, 6.5, 5, 10], 
+                    backgroundColor: ['#60a5fa', '#22c55e', '#f59e0b', '#ef4444'],
+                    borderColor: '#fff',
+                    borderWidth: 2,
+                    circumference: 180,
+                    rotation: 270,
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                cutout: '80%'
+            }
+        });
+    }
+
+    // 2. Weight Trend Chart
+    if (document.getElementById('weightChart')) {
+        const weightCtx = document.getElementById('weightChart').getContext('2d');
+        new Chart(weightCtx, {
+            type: 'line',
+            data: {
+                labels: weightChartData.labels,
+                datasets: [{
+                    label: 'Weight (kg)',
+                    data: weightChartData.data,
+                    borderColor: 'rgba(79, 70, 229, 1)',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 4,
+                    pointBackgroundColor: 'rgba(79, 70, 229, 1)'
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: false } }
+            }
+        });
+    }
+
+    // 3. Exercise Activity Chart
+    if (document.getElementById('exerciseChart')) {
+        const exerciseCtx = document.getElementById('exerciseChart').getContext('2d');
+        new Chart(exerciseCtx, {
+            type: 'bar',
+            data: {
+                labels: exerciseChartData.labels,
+                datasets: [{
+                    label: 'Minutes',
+                    data: exerciseChartData.data,
+                    backgroundColor: 'rgba(34, 197, 94, 0.7)',
+                    borderColor: 'rgba(34, 197, 94, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, title: { display: true, text: 'Minutes' } } }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Journal{% endblock %}
+
+{% block content %}
+<div class="card journal-container">
+    <h2 class="page-title"><i class="fas fa-book-open"></i> How are you feeling today?</h2>
+    <p>Take a moment to check in with yourself. Selecting a mood and writing down your thoughts can help you understand your emotional patterns.</p>
+    
+    <form method="POST" action="{{ url_for('journal') }}">
+        <div class="form-group">
+            <label>Select Your Mood</label>
+            <div class="mood-selector">
+                <input type="radio" id="mood-1" name="mood" value="1" required {% if today_entry and today_entry.mood == 1 %}checked{% endif %}>
+                <label for="mood-1" title="Sad">😞</label>
+                <input type="radio" id="mood-2" name="mood" value="2" {% if today_entry and today_entry.mood == 2 %}checked{% endif %}>
+                <label for="mood-2" title="Okay">😐</label>
+                <input type="radio" id="mood-3" name="mood" value="3" {% if today_entry and today_entry.mood == 3 %}checked{% endif %}>
+                <label for="mood-3" title="Neutral">🙂</label>
+                <input type="radio" id="mood-4" name="mood" value="4" {% if today_entry and today_entry.mood == 4 %}checked{% endif %}>
+                <label for="mood-4" title="Good">😊</label>
+                <input type="radio" id="mood-5" name="mood" value="5" {% if today_entry and today_entry.mood == 5 %}checked{% endif %}>
+                <label for="mood-5" title="Great">😄</label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="entry_text">Today's Thoughts (Optional)</label>
+            <textarea name="entry_text" id="entry_text" rows="6" placeholder="What's on your mind? What influenced your mood today?">{{ today_entry.entry_text or '' }}</textarea>
+        </div>
+        <div class="form-group">
+            <label for="gratitude_text">What is one thing you're grateful for today? (Optional)</label>
+            <textarea name="gratitude_text" id="gratitude_text" rows="3" placeholder="Acknowledging small positives can boost your mood.">{{ today_entry.gratitude_text or '' }}</textarea>
+        </div>
+        <button type="submit" class="btn"><i class="fas fa-save"></i> Save Today's Entry</button>
+    </form>
+</div>
+
+<!-- START: FLOATING ACTION BUTTON AND HISTORY MODAL -->
+<!-- The Floating Button -->
+<button id="history-fab" title="View Journal History">
+    <i class="fas fa-history"></i>
+</button>
+
+<!-- The Modal Panel -->
+<div id="history-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-history"></i> Your Journal History</h3>
+            <button id="close-modal-btn" class="close-btn">×</button>
+        </div>
+        <div class="modal-body">
+            {% if history_entries %}
+                {% set mood_emojis = {1: '😞', 2: '😐', 3: '🙂', 4: '😊', 5: '😄'} %}
+                <div class="history-list">
+                    {% for entry in history_entries %}
+                        <div class="history-item">
+                            <div class="history-header">
+                                <span class="history-date">{{ entry.logged_at }}</span>
+                                <span class="history-mood">{{ mood_emojis[entry.mood] }}</span>
+                            </div>
+                            {% if entry.entry_text %}
+                                <div class="history-content">
+                                    <strong>Thoughts:</strong>
+                                    <p>{{ entry.entry_text }}</p>
+                                </div>
+                            {% endif %}
+                            {% if entry.gratitude_text %}
+                                <div class="history-content">
+                                    <strong>Grateful for:</strong>
+                                    <p>{{ entry.gratitude_text }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No past journal entries found. Start by saving today's entry!</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<!-- END: FLOATING ACTION BUTTON AND HISTORY MODAL -->
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .journal-container { max-width: 800px; margin: 0 auto; }
+    .mood-selector { display: flex; justify-content: center; gap: 1rem; margin: 1.5rem 0; }
+    .mood-selector input[type="radio"] { display: none; }
+    .mood-selector label {
+        font-size: 3rem; cursor: pointer; padding: 0.5rem; border-radius: 50%;
+        transition: all 0.2s ease; filter: grayscale(80%); opacity: 0.7;
+    }
+    .mood-selector input[type="radio"]:checked + label { transform: scale(1.2); filter: grayscale(0%); opacity: 1; }
+    .mood-selector label:hover { background-color: rgba(129, 140, 248, 0.1); }
+    
+    /* START: CSS FOR FLOATING BUTTON AND MODAL */
+    #history-fab {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 60px;
+        height: 60px;
+        background-image: var(--gradient-primary);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        box-shadow: var(--card-shadow-hover);
+        font-size: 1.5rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 1010;
+    }
+    #history-fab:hover {
+        transform: translateY(-5px) scale(1.1);
+    }
+    
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: flex-end; /* Align modal to the bottom */
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    
+    .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .modal-content {
+        background-color: white;
+        width: 100%;
+        max-width: 800px;
+        height: 80vh;
+        max-height: 80vh;
+        border-radius: 16px 16px 0 0;
+        display: flex;
+        flex-direction: column;
+        transform: translateY(100%);
+        transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    .modal-overlay.show .modal-content {
+        transform: translateY(0);
+    }
+    body.dark-theme .modal-content {
+        background-color: #1e293b;
+    }
+    
+    .modal-header {
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        flex-shrink: 0;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 2rem;
+        cursor: pointer;
+        color: var(--text-light);
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+        overflow-y: auto;
+        flex-grow: 1;
+    }
+
+    .history-list {
+        display: flex; flex-direction: column; gap: 1.5rem;
+    }
+    .history-item {
+        background-color: var(--background-color); padding: 1.5rem;
+        border-radius: 12px; border: 1px solid var(--border-color);
+    }
+    .history-header {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 1rem; padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .history-date { font-weight: 600; color: var(--primary-color); }
+    .history-mood { font-size: 2rem; }
+    .history-content { margin-top: 1rem; }
+    .history-content p {
+        margin-top: 0.5rem; color: var(--text-light);
+        white-space: pre-wrap; line-height: 1.6;
+    }
+    /* END: CSS FOR FLOATING BUTTON AND MODAL */
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const historyFab = document.getElementById('history-fab');
+    const historyModal = document.getElementById('history-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+
+    // Function to open the modal
+    const openModal = () => {
+        historyModal.classList.add('show');
+        // Prevent body from scrolling when modal is open
+        document.body.style.overflow = 'hidden';
+    };
+
+    // Function to close the modal
+    const closeModal = () => {
+        historyModal.classList.remove('show');
+        document.body.style.overflow = '';
+    };
+
+    // Event listeners
+    historyFab.addEventListener('click', openModal);
+    closeModalBtn.addEventListener('click', closeModal);
+
+    // Close modal if user clicks on the overlay (outside the content)
+    historyModal.addEventListener('click', (event) => {
+        if (event.target === historyModal) {
+            closeModal();
+        }
+    });
+
+    // Close modal if user presses the Escape key
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    });
+});
+</script>
+{% endblock %}

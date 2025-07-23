@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Memory Game{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="page-title"><i class="fas fa-puzzle-piece"></i> Mindfulness Memory Game</h2>
+    <p>Take a break and challenge your focus. Match the pairs of calming icons to clear the board.</p>
+</div>
+
+<section class="memory-game">
+    <div class="memory-card" data-framework="heart">
+        <div class="front-face"><i class="fas fa-heart"></i></div>
+        <div class="back-face"></div>
+    </div>
+    <div class="memory-card" data-framework="heart">
+        <div class="front-face"><i class="fas fa-heart"></i></div>
+        <div class="back-face"></div>
+    </div>
+    <div class="memory-card" data-framework="leaf">
+        <div class="front-face"><i class="fas fa-leaf"></i></div>
+        <div class="back-face"></div>
+    </div>
+    <div class="memory-card" data-framework="leaf">
+        <div class="front-face"><i class="fas fa-leaf"></i></div>
+        <div class="back-face"></div>
+    </div>
+    <div class="memory-card" data-framework="sun">
+        <div class="front-face"><i class="fas fa-sun"></i></div>
+        <div class="back-face"></div>
+    </div>
+    <div class="memory-card" data-framework="sun">
+        <div class="front-face"><i class="fas fa-sun"></i></div>
+        <div class="back-face"></div>
+    </div>
+    <div class="memory-card" data-framework="feather">
+        <div class="front-face"><i class="fas fa-feather-alt"></i></div>
+        <div class="back-face"></div>
+    </div>
+    <div class="memory-card" data-framework="feather">
+        <div class="front-face"><i class="fas fa-feather-alt"></i></div>
+        <div class="back-face"></div>
+    </div>
+    <div class="memory-card" data-framework="dove">
+        <div class="front-face"><i class="fas fa-dove"></i></div>
+        <div class="back-face"></div>
+    </div>
+    <div class="memory-card" data-framework="dove">
+        <div class="front-face"><i class="fas fa-dove"></i></div>
+        <div class="back-face"></div>
+    </div>
+    <div class="memory-card" data-framework="tree">
+        <div class="front-face"><i class="fas fa-tree"></i></div>
+        <div class="back-face"></div>
+    </div>
+    <div class="memory-card" data-framework="tree">
+        <div class="front-face"><i class="fas fa-tree"></i></div>
+        <div class="back-face"></div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .memory-game {
+        width: 100%;
+        max-width: 640px;
+        height: 640px;
+        margin: auto;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        gap: 1rem;
+        perspective: 1000px;
+    }
+
+    .memory-card {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform .5s;
+        cursor: pointer;
+    }
+
+    .memory-card:active {
+        transform: scale(0.97);
+        transition: transform .2s;
+    }
+    
+    .memory-card.flip {
+        transform: rotateY(180deg);
+    }
+
+    .front-face, .back-face {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        position: absolute;
+        border-radius: 12px;
+        backface-visibility: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 3rem;
+        box-shadow: var(--card-shadow);
+    }
+    
+    .front-face {
+        background: #eef2ff;
+        color: var(--primary-color);
+        transform: rotateY(180deg);
+    }
+
+    .back-face {
+        background-image: var(--gradient-primary);
+    }
+    
+    body.dark-theme .front-face {
+        background: #334155;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const cards = document.querySelectorAll('.memory-card');
+
+    let hasFlippedCard = false;
+    let lockBoard = false;
+    let firstCard, secondCard;
+
+    function flipCard() {
+        if (lockBoard) return;
+        if (this === firstCard) return;
+
+        this.classList.add('flip');
+
+        if (!hasFlippedCard) {
+            hasFlippedCard = true;
+            firstCard = this;
+            return;
+        }
+
+        secondCard = this;
+        lockBoard = true;
+
+        checkForMatch();
+    }
+
+    function checkForMatch() {
+        let isMatch = firstCard.dataset.framework === secondCard.dataset.framework;
+        isMatch ? disableCards() : unflipCards();
+    }
+
+    function disableCards() {
+        firstCard.removeEventListener('click', flipCard);
+        secondCard.removeEventListener('click', flipCard);
+        resetBoard();
+    }
+
+    function unflipCards() {
+        setTimeout(() => {
+            firstCard.classList.remove('flip');
+            secondCard.classList.remove('flip');
+            resetBoard();
+        }, 1200);
+    }
+
+    function resetBoard() {
+        [hasFlippedCard, lockBoard] = [false, false];
+        [firstCard, secondCard] = [null, null];
+    }
+
+    (function shuffle() {
+        cards.forEach(card => {
+            let randomPos = Math.floor(Math.random() * 12);
+            card.style.order = randomPos;
+        });
+    })();
+
+    cards.forEach(card => card.addEventListener('click', flipCard));
+});
+</script>
+{% endblock %}

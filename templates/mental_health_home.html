@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block title %}Mental Wellness{% endblock %}
+
+{% block content %}
+<section class="hero-section mental-hero">
+    <div class="hero-content">
+        <h1>Your Space for Mental Wellness</h1>
+        <p>Tools and insights to help you understand your mind, manage stress, and cultivate a positive outlook. Welcome, {{ session.get('user_name', 'Guest') }}!</p>
+        <a href="{{ url_for('journal') }}" class="btn"><i class="fas fa-pen-nib"></i> Log Today's Mood</a>
+    </div>
+</section>
+
+<section id="personal-management">
+    <div class="section-title">
+        <h2>Personal Mental Health Management</h2>
+        <p>Engage with your thoughts and track your emotional journey.</p>
+    </div>
+    <div class="features-grid">
+        <a href="{{ url_for('journal') }}" class="feature-card-link">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-book-open"></i></div>
+                <h3>Daily Journaling</h3>
+                <p>Check in with your mood and write down your thoughts to foster self-awareness.</p>
+            </div>
+        </a>
+        <a href="{{ url_for('mindful_chat') }}" class="feature-card-link">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-comments"></i></div>
+                <h3>Mindful Chat</h3>
+                <p>Have a supportive, reflective chat about what's on your mind with our AI assistant.</p>
+            </div>
+        </a>
+    </div>
+</section>
+
+<section id="mindfulness-activities">
+    <div class="section-title">
+        <h2>Mindfulness & Stress Relief</h2>
+        <p>Activities designed to bring calm and clarity to your day.</p>
+    </div>
+    <div class="features-grid">
+        <a href="{{ url_for('relax') }}" class="feature-card-link">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-wind"></i></div>
+                <h3>Breathing Exercise</h3>
+                <p>A simple, guided exercise to help you calm your mind and reduce stress.</p>
+            </div>
+        </a>
+        
+        <a href="{{ url_for('coloring_book') }}" class="feature-card-link">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-palette"></i></div>
+                <h3>Coloring Book</h3>
+                <p>Engage in a creative, calming activity by coloring a beautiful mandala.</p>
+            </div>
+        </a>
+        <a href="{{ url_for('guided_meditation') }}" class="feature-card-link">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-headphones-alt"></i></div>
+                <h3>Guided Meditations</h3>
+                <p>Listen to guided audio sessions for stress relief, focus, and sleep.</p>
+            </div>
+        </a>
+    </div>
+    <div class="section-title">
+        <h2>Play something for the time being.</h2>
+    </div>
+    <div class="features-grid">
+        <a href="{{ url_for('memory_game') }}" class="feature-card-link">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-puzzle-piece"></i></div>
+                <h3>Memory Game</h3>
+                <p>A light and fun game to help you focus your mind and take a short break.</p>
+            </div>
+        </a>
+        <a href="{{ url_for('zen_garden') }}" class="feature-card-link">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-seedling"></i></div>
+                <h3>Zen Garden</h3>
+                <p>A quiet space to focus your mind by raking sand and creating calming patterns.</p>
+            </div>
+        </a>
+    </div>
+</section>
+
+<section id="support-learning">
+    <div class="section-title">
+        <h2>Support & Learning</h2>
+        <p>Resources to help you build a positive mindset and learn more.</p>
+    </div>
+    <div class="features-grid">
+        <a href="{{ url_for('affirmations') }}" class="feature-card-link">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-quote-left"></i></div>
+                <h3>Positive Affirmation</h3>
+                <p>Start your day with an uplifting message to foster a positive mindset.</p>
+            </div>
+        </a>
+        <a href="{{ url_for('resources') }}" class="feature-card-link">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-book"></i></div>
+                <h3>Helpful Resources</h3>
+                <p>Find articles, videos, and links to learn more about mental health.</p>
+            </div>
+        </a>
+    </div>
+</section>
+
+<section id="mood-dashboard">
+    <div class="section-title">
+        <h2>Your Mood Over Time</h2>
+        <p>Visualize your daily mood entries to identify patterns and track your progress.</p>
+    </div>
+    <div class="card">
+        
+        <!-- Check if there is data. The 'data' array in the JSON will be empty if no entries. -->
+        {% if mood_chart_data and '"data": []' not in mood_chart_data %}
+            <div class="chart-container">
+                <canvas id="moodChart"></canvas>
+            </div>
+        {% else %}
+            <!-- This message will show if there are no journal entries -->
+            <div class="no-data-message">
+                <p>No mood history yet!</p>
+                <span>Start logging your mood daily to see your progress here.</span>
+                <a href="{{ url_for('journal') }}" class="btn" style="margin-top: 1.5rem;">
+                    <i class="fas fa-plus"></i> Log Today's Mood
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+</section>
+
+<section id="health-tips">
+  <div class="section-title">
+    <h2>Mental Wellness Tips</h2>
+    <p>Expert advice and practical tips for maintaining your mental wellbeing.</p>
+  </div>
+  <div class="tips-grid">
+    {% for tip in mental_health_tips %}
+    <a href="{{ tip.link }}" class="tip-card-link" target="_blank">
+      <article class="tip-card">
+        <div class="tip-image"><img src="{{ tip.image }}" alt="{{ tip.title }}"></div>
+        <div class="tip-content">
+          <span class="tip-category">{{ tip.category }}</span>
+          <h3 class="tip-title">{{ tip.title }}</h3>
+        </div>
+      </article>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<footer class="copyright-footer">
+    <p>© 2025 HealthCare-AI. All rights reserved.</p>
+</footer>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* All the existing CSS from the previous step remains unchanged */
+    .hero-section {
+        padding: 6rem 2rem; text-align: center; border-radius: 24px; color: white; margin-bottom: 4rem;
+        background-size: cover; background-position: center;
+    }
+    .mental-hero {
+        background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1544383835-bda2bc66a22d?q=80&w=1974&auto=format&fit=crop');
+    }
+    .hero-content h1 { font-size: 3rem; font-weight: 700; margin-bottom: 1rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    .hero-content p { font-size: 1.25rem; max-width: 700px; margin: 0 auto 2rem; opacity: 0.9; }
+    .section-title { text-align: center; margin: 5rem 0 2rem; }
+    .section-title h2 { font-size: 2.25rem; margin-bottom: 0.5rem; color: var(--primary-dark); }
+    body.dark-theme .section-title h2 { color: var(--accent-color); }
+    .section-title p { color: var(--text-light); max-width: 600px; margin: 0 auto; }
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));  
+        gap: 1.5rem;
+
+    }
+    .feature-card-link { text-decoration: none; }
+    .feature-card {
+        background: white; border-radius: 16px; padding: 2rem; text-align: center; border: 1px solid var(--border-color);
+        transition: var(--transition); display: flex; flex-direction: column; align-items: center; gap: 1rem; height: 100%;
+        opacity: 0; transform: translateY(20px);
+    }
+    body.dark-theme .feature-card { background-color: #1e293b; }
+    .feature-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: var(--card-shadow-hover); border-color: var(--primary-color); }
+    .feature-icon {
+        font-size: 2.5rem; width: 80px; height: 80px; display: grid; place-items: center; border-radius: 50%;
+        background-image: var(--gradient-primary); color: white; margin-bottom: 1rem; transition: var(--transition);
+    }
+    .feature-card:hover .feature-icon { transform: scale(1.1) rotate(10deg); }
+    .feature-card h3 { color: var(--primary-dark); font-size: 1.3rem; margin-bottom: 0.5rem; }
+    body.dark-theme .feature-card h3 { color: var(--text-color); }
+    .feature-card p { color: var(--text-light); flex-grow: 1; }
+    .chart-container { height: 400px; padding: 1rem; }
+    .tips-grid { display: flex; flex-wrap: wrap; gap: 1.5rem; }
+    .tip-card-link { text-decoration: none; flex-grow: 1; flex-basis: 300px; display: flex; }
+    .tip-card {
+        background: var(--secondary-color); border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow);
+        transition: var(--transition); position: relative; height: 350px; display: block; width: 100%;
+        opacity: 0; transform: translateY(20px);
+    }
+    .tip-card:hover { transform: scale(1.05); box-shadow: var(--card-shadow-hover); }
+    .tip-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    .tip-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+    .tip-card:hover .tip-image img { transform: scale(1.1); }
+    .tip-content {
+        position: absolute; bottom: 0; left: 0; right: 0; padding: 1.5rem;
+        background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); color: white; z-index: 1;
+    }
+    .tip-category {
+        display: inline-block; padding: 0.25rem 0.75rem; background: rgba(255,255,255,0.2);
+        color: white; border-radius: 15px; font-size: 0.75rem; margin-bottom: 0.75rem;
+        backdrop-filter: blur(5px); font-weight: 500;
+    }
+    .tip-title { font-size: 1.25rem; color: white; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .copyright-footer { color: var(--text-light); padding: 2rem 0; margin-top: 4rem; text-align: center; }
+
+    .no-data-message {
+        text-align: center;
+        padding: 3rem 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .no-data-message p {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--primary-dark);
+    }
+    body.dark-theme .no-data-message p {
+        color: var(--accent-color);
+    }
+    .no-data-message span {
+        color: var(--text-light);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- These script tags are essential -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const moodChartData = {{ mood_chart_data|tojson }};
+    const moodCtx = document.getElementById('moodChart').getContext('2d');
+    
+    // Register the plugin so Chart.js knows how to use it
+    Chart.register(ChartDataLabels);
+
+    const moodLabels = {1: 'Sad', 2: 'Okay', 3: 'Neutral', 4: 'Good', 5: 'Great'};
+    const moodEmojis = {1: '😞', 2: '😐', 3: '🙂', 4: '😊', 5: '😄'};
+
+    new Chart(moodCtx, {
+        type: 'line',
+        data: {
+            labels: moodChartData.labels,
+            datasets: [{
+                label: 'Daily Mood',
+                data: moodChartData.data,
+                borderColor: 'rgba(129, 140, 248, 1)',
+                backgroundColor: 'rgba(129, 140, 248, 0.2)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0, // Hide the default dots
+                pointHitRadius: 10,
+                pointHoverRadius: 0,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: 0.5,
+                    max: 5.5,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value, index, values) { return moodLabels[value] || ''; },
+                        color: 'rgba(148, 163, 184, 1)'
+                    },
+                    grid: { color: 'rgba(51, 65, 85, 1)' }
+                },
+                x: {
+                    ticks: { color: 'rgba(148, 163, 184, 1)' },
+                    grid: { display: false }
+                }
+            },
+            plugins: {
+                // This is the configuration for the emoji labels
+                datalabels: {
+                    formatter: (value, context) => {
+                        // This function maps the data value (e.g., 4) to an emoji (e.g., 😊)
+                        return moodEmojis[value];
+                    },
+                    /* THIS IS THE CRITICAL FIX: The color property has been REMOVED */
+                    font: {
+                        size: 20, // Feel free to adjust the size of the emoji
+                    },
+                    align: 'end',
+                    anchor: 'end',
+                },
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) { label += ': '; }
+                            if (context.parsed.y !== null) { label += moodLabels[context.parsed.y] || 'Unknown'; }
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,284 @@
+
+{% extends "base.html" %}
+
+{% block title %}User Settings{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="page-title"><i class="fas fa-cog"></i> Settings & Profile</h2>
+    <p>Manage your personal information, security, and notification preferences.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ 'success' if category == 'success' else 'error' }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- Tabs Navigation -->
+    <div class="tabs">
+        <button class="tab-link {% if active_tab == 'Profile' %}active{% endif %}" onclick="openTab(event, 'Profile')">Profile & Health</button>
+        <button class="tab-link {% if active_tab == 'Insurance' %}active{% endif %}" onclick="openTab(event, 'Insurance')">Insurance</button>
+        <button class="tab-link {% if active_tab == 'History' %}active{% endif %}" onclick="openTab(event, 'History')">Account History & Security</button>
+    </div>
+
+    <!-- Profile Tab Content -->
+    <div id="Profile" class="tab-content">
+        <form method="POST" action="{{ url_for('settings') }}" enctype="multipart/form-data" class="form-group" style="margin-top: 2rem;">
+            <!-- Hidden field to know which tab was active -->
+            <input type="hidden" name="active_tab" value="Profile">
+            <!-- Hidden fields for Insurance data to preserve it when saving Profile -->
+            <input type="hidden" name="health_insurance_provider" value="{{ user.health_insurance_provider or '' }}">
+            <input type="hidden" name="health_policy_id" value="{{ user.health_policy_id or '' }}">
+            <input type="hidden" name="health_group_number" value="{{ user.health_group_number or '' }}">
+            <input type="hidden" name="life_insurance_provider" value="{{ user.life_insurance_provider or '' }}">
+            <input type="hidden" name="life_policy_id" value="{{ user.life_policy_id or '' }}">
+
+            <h3 class="section-header">Personal Information</h3>
+            <div class="profile-photo-section">
+                <div class="photo-preview">
+                    {% if user.photo_filename %}
+                        <img src="{{ url_for('static', filename='uploads/' + user.photo_filename) }}" alt="Profile Photo">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/default_avatar.png') }}" alt="Default Profile Photo">
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="photo">Update Profile Photo</label>
+                    <input type="file" id="photo" name="photo" accept="image/png, image/jpeg">
+                    <small>Recommended size: 200x200px. Max file size: 2MB.</small>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label for="name">Full Name</label><input type="text" id="name" name="name" value="{{ user.name }}" required></div>
+                <div class="form-group"><label for="email">Email</label><input type="email" id="email" name="email" value="{{ user.email }}" readonly disabled><small>Email cannot be changed.</small></div>
+                <div class="form-group"><label for="age">Age</label><input type="number" id="age" name="age" value="{{ user.age }}" required min="1" max="120"></div>
+                <div class="form-group"><label for="gender">Gender</label><select id="gender" name="gender" required><option value="male" {% if user.gender == 'male' %}selected{% endif %}>Male</option><option value="female" {% if user.gender == 'female' %}selected{% endif %}>Female</option><option value="other" {% if user.gender == 'other' %}selected{% endif %}>Other</option></select></div>
+                <div class="form-group"><label for="weight">Weight (kg)</label><input type="number" step="0.1" id="weight" name="weight" value="{{ user.weight or '' }}" placeholder="e.g., 70.5"></div>
+                <div class="form-group"><label for="height">Height (cm)</label><input type="number" step="0.1" id="height" name="height" value="{{ user.height or '' }}" placeholder="e.g., 175"></div>
+                <div class="form-group"><label for="phone_number">Phone Number</label><input type="tel" id="phone_number" name="phone_number" value="{{ user.phone_number or '' }}" placeholder="e.g., +1-555-1234"></div>
+                <div class="form-group"><label for="emergency_number">Emergency Contact Number</label><input type="tel" id="emergency_number" name="emergency_number" value="{{ user.emergency_number or '' }}" placeholder="e.g., +1-555-5678"></div>
+            </div>
+            <div class="form-group"><label for="address">Address</label><textarea id="address" name="address" rows="3" placeholder="Enter your full address">{{ user.address or '' }}</textarea></div>
+            
+            <h3 class="section-header">Health Information</h3>
+            <div class="form-grid">
+                <div class="form-group"><label for="blood_group">Blood Group</label><select id="blood_group" name="blood_group"><option value="" {% if not user.blood_group %}selected{% endif %}>Select...</option><option value="A+" {% if user.blood_group == 'A+' %}selected{% endif %}>A+</option><option value="A-" {% if user.blood_group == 'A-' %}selected{% endif %}>A-</option><option value="B+" {% if user.blood_group == 'B+' %}selected{% endif %}>B+</option><option value="B-" {% if user.blood_group == 'B-' %}selected{% endif %}>B-</option><option value="AB+" {% if user.blood_group == 'AB+' %}selected{% endif %}>AB+</option><option value="AB-" {% if user.blood_group == 'AB-' %}selected{% endif %}>AB-</option><option value="O+" {% if user.blood_group == 'O+' %}selected{% endif %}>O+</option><option value="O-" {% if user.blood_group == 'O-' %}selected{% endif %}>O-</option><option value="Unknown" {% if user.blood_group == 'Unknown' %}selected{% endif %}>I don't know</option></select></div>
+                <div class="form-group">
+                    <label for="timezone">Timezone</label>
+                    <select id="timezone" name="timezone">
+                        {% for tz in timezones %}
+                            <option value="{{ tz }}" {% if tz == user.timezone %}selected{% endif %}>{{ tz }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group"><label for="blood_sugar">Blood Sugar (mg/dL)</label><input type="number" id="blood_sugar" name="blood_sugar" value="{{ user.blood_sugar or '' }}" placeholder="e.g., 95"></div>
+                <div class="form-group"><label for="cholesterol">Total Cholesterol (mg/dL)</label><input type="number" id="cholesterol" name="cholesterol" value="{{ user.cholesterol or '' }}" placeholder="e.g., 180"></div>
+                <div class="form-group"><label for="systolic_bp">Systolic BP (mmHg)</label><input type="number" id="systolic_bp" name="systolic_bp" value="{{ user.systolic_bp or '' }}" placeholder="e.g., 120"></div>
+                <div class="form-group"><label for="diastolic_bp">Diastolic BP (mmHg)</label><input type="number" id="diastolic_bp" name="diastolic_bp" value="{{ user.diastolic_bp or '' }}" placeholder="e.g., 80"></div>
+            </div>
+            <div class="form-group"><label for="chronic_illnesses">Chronic Illnesses</label><textarea id="chronic_illnesses" name="chronic_illnesses" rows="3" placeholder="e.g., Diabetes, Hypertension, Asthma. Leave blank if none.">{{ user.chronic_illnesses or '' }}</textarea></div>
+            <div class="form-group"><label for="past_surgeries">Past Surgeries</label><textarea id="past_surgeries" name="past_surgeries" rows="3" placeholder="e.g., Appendectomy (2015), Knee surgery (2020). Leave blank if none.">{{ user.past_surgeries or '' }}</textarea></div>
+            <div class="form-group"><label for="genetic_diseases">Known Genetic Diseases in Family</label><textarea id="genetic_diseases" name="genetic_diseases" rows="3" placeholder="e.g., Family history of heart disease, BRCA gene. Leave blank if none.">{{ user.genetic_diseases or '' }}</textarea></div>
+            
+            <h3 class="section-header">Checkup Information</h3>
+            <div class="form-group"><label for="last_checkup_date">Last Health Check-up Date</label><input type="date" id="last_checkup_date" name="last_checkup_date" value="{{ user.last_checkup_date or '' }}"></div>
+            
+            <h3 class="section-header">Notification Settings</h3>
+            <div class="form-group checkbox-style">
+                <input type="checkbox" id="notifications_enabled" name="notifications_enabled" value="1" {% if user.notifications_enabled %}checked{% endif %}>
+                <label for="notifications_enabled">Enable all email and app notifications</label>
+                <small>This includes reminders for medications and appointments.</small>
+            </div>
+            <button type="submit" class="btn" style="margin-top: 1rem;">Save Profile & Settings</button>
+        </form>
+    </div>
+
+    <!-- Insurance Tab Content -->
+    <div id="Insurance" class="tab-content">
+        <h3 class="section-header">Explore New Policies</h3>
+        <p>Looking for new coverage? Explore options from LIC India directly.</p>
+        <div class="explore-buttons">
+            <a href="https://www.icicilombard.com/health-insurance/elevate-health-policy/?opt=elevateArtemisAI&source=nav&gclid=CjwKCAjwpMTCBhA-EiwA_-MsmQvUDEWh4g68lrcNFvyWoh155w93elcNZHoV9Z_ECXfVZ1tb6_JYFRoC_O8QAvD_BwE&gbraid=0AAAAADqKtDHfMWVQVO0gyqRPJvKricec3&gad_campaignid=21154539756&gad_source=1&utm_matchtype=e&utm_network=g&utm_placement=&utm_ad=703776925886&utm_device=c&utm_keyword=health%20insurance%20plans&utm_adgroup=Generic_Health_Plan&utm_campaign=Health_Search_Generic_Apr24&utm_medium=CPC&utm_source=google_search" target="_blank" class="btn btn-secondary">
+                <i class="fas fa-heart-pulse"></i> Explore Health Insurance
+            </a>
+            <a href="https://www.policybazaar.com/life-insurance/" target="_blank" class="btn btn-secondary">
+                <i class="fas fa-umbrella"></i> Explore Life Insurance
+            </a>
+        </div>
+
+        <form method="POST" action="{{ url_for('settings') }}">
+            <!-- Hidden field to know which tab was active -->
+            <input type="hidden" name="active_tab" value="Insurance">
+            <!-- Hidden fields for Profile data to preserve it when saving Insurance -->
+            <input type="hidden" name="name" value="{{ user.name }}">
+            <input type="hidden" name="age" value="{{ user.age }}">
+            <input type="hidden" name="gender" value="{{ user.gender }}">
+            <input type="hidden" name="weight" value="{{ user.weight or '' }}">
+            <input type="hidden" name="height" value="{{ user.height or '' }}">
+            <input type="hidden" name="phone_number" value="{{ user.phone_number or '' }}">
+            <input type="hidden" name="emergency_number" value="{{ user.emergency_number or '' }}">
+            <input type="hidden" name="address" value="{{ user.address or '' }}">
+            <input type="hidden" name="blood_group" value="{{ user.blood_group or '' }}">
+            <input type="hidden" name="timezone" value="{{ user.timezone or '' }}">
+            <input type="hidden" name="blood_sugar" value="{{ user.blood_sugar or '' }}">
+            <input type="hidden" name="cholesterol" value="{{ user.cholesterol or '' }}">
+            <input type="hidden" name="systolic_bp" value="{{ user.systolic_bp or '' }}">
+            <input type="hidden" name="diastolic_bp" value="{{ user.diastolic_bp or '' }}">
+            <input type="hidden" name="chronic_illnesses" value="{{ user.chronic_illnesses or '' }}">
+            <input type="hidden" name="past_surgeries" value="{{ user.past_surgeries or '' }}">
+            <input type="hidden" name="genetic_diseases" value="{{ user.genetic_diseases or '' }}">
+            <input type="hidden" name="last_checkup_date" value="{{ user.last_checkup_date or '' }}">
+            <input type="hidden" name="notifications_enabled" value="1" {% if user.notifications_enabled %}checked{% endif %}>
+
+            <h3 class="section-header">My Current Policies</h3>
+            <h4>Health Insurance Details</h4>
+            <div class="form-grid">
+                <div class="form-group"><label for="health_insurance_provider">Provider Name</label><input type="text" id="health_insurance_provider" name="health_insurance_provider" value="{{ user.health_insurance_provider or '' }}"></div>
+                <div class="form-group"><label for="health_policy_id">Policy / Member ID</label><input type="text" id="health_policy_id" name="health_policy_id" value="{{ user.health_policy_id or '' }}"></div>
+                <div class="form-group"><label for="health_group_number">Group Number</label><input type="text" id="health_group_number" name="health_group_number" value="{{ user.health_group_number or '' }}"></div>
+            </div>
+            
+            <h4 style="margin-top: 2rem;">Life Insurance Details</h4>
+            <div class="form-grid">
+                <div class="form-group"><label for="life_insurance_provider">Provider Name</label><input type="text" id="life_insurance_provider" name="life_insurance_provider" value="{{ user.life_insurance_provider or '' }}"></div>
+                <div class="form-group"><label for="life_policy_id">Policy Number</label><input type="text" id="life_policy_id" name="life_policy_id" value="{{ user.life_policy_id or '' }}"></div>
+            </div>
+
+            <button type="submit" class="btn" style="margin-top: 1rem;">Save Insurance Details</button>
+        </form>
+    </div>
+
+
+    <!-- History Tab Content -->
+    <div id="History" class="tab-content">
+        <h3 class="section-header">Change Password</h3>
+        <form method="POST" action="{{ url_for('change_password') }}">
+            <div class="form-grid">
+                <div class="form-group"><label for="current_password">Current Password</label><input type="password" id="current_password" name="current_password" required></div>
+                <div class="form-group"><label for="new_password">New Password</label><input type="password" id="new_password" name="new_password" required></div>
+                <div class="form-group"><label for="confirm_password">Confirm New Password</label><input type="password" id="confirm_password" name="confirm_password" required></div>
+            </div>
+            <button type="submit" class="btn">Change Password</button>
+        </form>
+
+        <h3 class="section-header">Push Notifications</h3>
+        <p>Your device needs to grant permission to receive notifications. You can test if your device is connected below.</p>
+        <form method="POST" action="{{ url_for('send_push_test') }}">
+            <button type="submit" class="btn">Send Test Notification</button>
+        </form>
+
+        <h3 class="section-header">Data Management</h3>
+        <p>You can download a full copy of your health data, including your profile, medical history, medications, appointments, and logs.</p>
+        <a href="{{ url_for('download_report') }}" class="btn" style="background: var(--success-color); margin-top: 1rem;">
+            <i class="fas fa-download"></i> Download Full Health Report
+        </a>
+
+        <h3 class="section-header">Account Activity Log</h3>
+        <div class="history-log-container">
+            {% if history %}
+                {% for item in history %}
+                <div class="history-item">
+                    <div class="history-icon {{ item.event_type | lower }}">
+                        {% if item.event_type == 'Security' %}<i class="fas fa-shield-alt"></i>
+                        {% elif item.event_type == 'Profile' %}<i class="fas fa-user-edit"></i>
+                        {% elif item.event_type == 'Medication' %}<i class="fas fa-pills"></i>
+                        {% elif item.event_type == 'Appointment' %}<i class="fas fa-calendar-alt"></i>
+                        {% elif item.event_type == 'Exercise' %}<i class="fas fa-dumbbell"></i>
+                        {% else %}<i class="fas fa-history"></i>
+                        {% endif %}
+                    </div>
+                    <div class="history-content">
+                        <p class="description">{{ item.description }}</p>
+                        <p class="timestamp">{{ item.event_timestamp | to_local_time(user_tz) }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No account history found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+.section-header { margin-top: 2.5rem; margin-bottom: 1.5rem; color: var(--primary-color); border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+.profile-photo-section { display: flex; align-items: center; gap: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.photo-preview img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--border-color); }
+.checkbox-style { display: flex; align-items: center; gap: 0.75rem; }
+.checkbox-style input[type="checkbox"] { width: auto; height: 1.2em; }
+.checkbox-style label { margin-bottom: 0; }
+
+.tabs { border-bottom: 2px solid var(--border-color); margin-bottom: 2rem; }
+.tab-link {
+    background: none; border: none; padding: 1rem 1.5rem;
+    cursor: pointer; font-size: 1rem; font-weight: 500;
+    color: var(--text-light); border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+.tab-link:hover { color: var(--primary-color); }
+.tab-link.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
+.tab-content { display: none; animation: fadeIn 0.5s; }
+
+.explore-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+.btn-secondary {
+    background: var(--secondary-color);
+    background-image: none;
+}
+.btn-secondary:hover {
+    background: var(--text-color);
+}
+
+.history-log-container { max-height: 500px; overflow-y: auto; padding-right: 1rem; }
+.history-item { display: flex; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--border-color); }
+.history-item:last-child { border-bottom: none; }
+.history-icon {
+    flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
+    display: grid; place-items: center; color: white;
+}
+.history-icon.security { background-color: var(--warning-color); }
+.history-icon.profile { background-color: var(--primary-color); }
+.history-icon.medication { background-color: var(--success-color); }
+.history-icon.appointment { background-color: #3b82f6; } /* accent blue */
+.history-icon.exercise { background-color: #ef4444; } /* error/red */
+.history-icon i { font-size: 1.1rem; }
+.history-content .description { font-weight: 500; margin: 0 0 0.25rem; }
+.history-content .timestamp { font-size: 0.8rem; color: var(--text-light); margin: 0; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openTab(evt, tabName) {
+    let i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tab-link");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+    const activeTabName = {{ active_tab|tojson }};
+    const tabButton = document.querySelector(`.tab-link[onclick*="'${activeTabName}'"]`);
+    if (tabButton) {
+        tabButton.click();
+    } else {
+        // Default to the first tab if no active tab is specified
+        document.querySelector('.tab-link').click();
+    }
+});
+</script>
+{% endblock %}

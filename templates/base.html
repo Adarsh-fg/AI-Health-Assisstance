@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealthCare AI - {% block title %}{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #4f46e5;
+      --primary-dark: #4338ca;
+      --secondary-color: #64748b;
+      --accent-color: #818cf8;
+      --background-color: #f8fafc;
+      --background-gradient: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      --text-color: #1e293b;
+      --text-light: #475569;
+      --success-color: #22c55e;
+      --warning-color: #f59e0b;
+      --error-color: #ef4444;
+      --border-color: #e2e8f0;
+      --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+      --card-shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --gradient-primary: linear-gradient(135deg, #4f46e5 0%, #818cf8 100%);
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* --- Dark Theme Variables --- */
+    body.dark-theme {
+        --primary-color: #818cf8;
+        --primary-dark: #6366f1;
+        --background-color: #1e293b;
+        --background-gradient: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+        --text-color: #e2e8f0;
+        --text-light: #94a3b8;
+        --border-color: #334155;
+        --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+    body.dark-theme .card,
+    body.dark-theme .navbar,
+    body.dark-theme .notification-panel {
+        background-color: #1e293b;
+        border-color: var(--border-color);
+    }
+    body.dark-theme .toast { background-color: #334155; }
+    body.dark-theme .form-group input, 
+    body.dark-theme .form-group select, 
+    body.dark-theme .form-group textarea {
+        background-color: #334155;
+        color: var(--text-color);
+        border-color: #475569;
+    }
+    body.dark-theme .nav-logo { color: var(--accent-color); }
+    body.dark-theme .nav-links a { color: var(--text-light); }
+    body.dark-theme .nav-links a:hover { background-color: var(--primary-color); color: #0f172a; }
+    body.dark-theme .page-title { color: var(--accent-color); }
+    body.dark-theme .btn-secondary { background: var(--secondary-color); }
+    body.dark-theme p, body.dark-theme li, body.dark-theme h3, body.dark-theme h4 {
+        color: var(--text-color);
+    }
+    body.dark-theme .feature-card h3 { color: var(--text-color); }
+    body.dark-theme .feature-card p { color: var(--text-light); }
+    body.dark-theme .chat-message.bot .message-content {
+        background-color: #334155;
+        color: var(--text-color);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 100px; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-image: var(--background-gradient);
+      color: var(--text-color);
+      line-height: 1.6;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    .navbar {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+      transition: var(--transition);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .nav-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    .nav-logo-group { display: flex; align-items: center; gap: 1rem; }
+    .nav-logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: var(--primary-color); font-weight: 700; font-size: 1.5rem; }
+    .nav-logo img { width: 40px; height: 40px; transition: transform 0.3s ease; }
+    .nav-logo:hover img { transform: rotate(15deg); }
+
+    /* --- Theme Toggle Button --- */
+    .theme-toggle {
+        display: flex;
+        align-items: center;
+        background-color: var(--border-color);
+        border-radius: 99px;
+        padding: 4px;
+        cursor: pointer;
+    }
+    .theme-toggle a {
+        padding: 0.3rem 0.8rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border-radius: 99px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    .theme-toggle .toggle-physical {
+        color: var(--primary-dark);
+        background-color: {% if session.mode == 'physical' %}white{% else %}transparent{% endif %};
+    }
+    .theme-toggle .toggle-mental {
+        color: var(--secondary-color);
+        background-color: {% if session.mode == 'mental' %}#334155{% else %}transparent{% endif %};
+    }
+    body.dark-theme .theme-toggle .toggle-mental { color: white; }
+    body.dark-theme .theme-toggle .toggle-physical { color: var(--text-light); }
+
+
+    .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+    .nav-links a {
+      display: flex; align-items: center; justify-content: center; padding: 0.6rem;
+      border-radius: 50%; background-color: transparent; color: var(--text-light);
+      transition: var(--transition); position: relative;
+      text-decoration: none;
+    }
+    .nav-links a i { font-size: 1.2rem; width: 24px; height: 24px; text-align: center; }
+    .nav-links a:hover { background-color: var(--primary-color); color: white; transform: translateY(-2px); }
+    .notification-bell { position: relative; }
+    .notification-dot {
+        position: absolute; top: 4px; right: 4px; width: 10px; height: 10px;
+        background-color: var(--error-color); border-radius: 50%; border: 2px solid white;
+        display: {% if site_notifications %} block {% else %} none {% endif %};
+    }
+    .notification-panel {
+        display: none; position: absolute; top: calc(100% + 15px); right: 0;
+        background-color: white; border-radius: 12px; box-shadow: var(--card-shadow-hover);
+        width: 320px; z-index: 1001; border: 1px solid var(--border-color); overflow: hidden;
+    }
+    .notification-panel.show { display: block; animation: fadeIn 0.2s ease-out; }
+    .notification-header { padding: 0.75rem 1rem; font-weight: 600; border-bottom: 1px solid var(--border-color); }
+    .notification-list { max-height: 300px; overflow-y: auto; }
+    .notification-item { display: flex; gap: 1rem; padding: 1rem; border-bottom: 1px solid var(--border-color); align-items: flex-start; }
+    .notification-item:last-child { border-bottom: none; }
+    .notification-item i { font-size: 1rem; color: var(--primary-color); margin-top: 4px; }
+    .notification-content p { font-size: 0.9rem; margin: 0; }
+    .notification-content .time { font-size: 0.75rem; color: var(--text-light); }
+    .no-notifications { padding: 2rem 1rem; text-align: center; color: var(--text-light); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .container { max-width: 1400px; margin: 0 auto; padding: 100px 2rem 2rem; }
+    .card {
+      background: white; border-radius: 16px; padding: 2rem; margin-bottom: 2rem;
+      box-shadow: var(--card-shadow); transition: var(--transition); border: 1px solid var(--border-color);
+      animation: fadeInUp 0.5s ease-out forwards; opacity: 0;
+    }
+    .card:hover { transform: translateY(-5px); box-shadow: var(--card-shadow-hover); }
+    .page-title { font-size: 2.25rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 1rem; }
+    .btn {margin-top: 1rem; text-align: center;
+      display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem;
+      background-image: var(--gradient-primary); color: white; text-decoration: none; border-radius: 12px;
+      font-weight: 500; transition: var(--transition); border: none; cursor: pointer;
+      box-shadow: 0 4px 15px -5px rgba(79, 70, 229, 0.5);
+    }
+    .btn:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 7px 20px -5px rgba(79, 70, 229, 0.6); }
+    .btn i { font-size: 1.1rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--text-color); }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border-color);
+      border-radius: 12px; font-size: 1rem; transition: var(--transition); background-color: #fff;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+    .alert { padding: 1rem 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+    .alert-info { background-color: #e0e7ff; color: #3730a3; }
+    .alert-warning { background-color: #fef3c7; color: #92400e; }
+    .alert-error { background-color: #fee2e2; color: #991b1b; }
+    @keyframes fadeInUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @media (max-width: 768px) { .navbar { padding: 0.75rem 1rem; } .container { padding: 80px 1rem 1rem; } }
+    .toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 1000; }
+    .toast { background: white; padding: 1rem 1.5rem; border-radius: 12px; box-shadow: var(--card-shadow-hover); margin-top: 1rem; display: flex; align-items: center; gap: 0.75rem; animation: slideInRight 0.3s ease-out; }
+    @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes fadeOutRight { to { transform: translateX(100%); opacity: 0; } }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="{% if session.mode == 'mental' %}dark-theme{% endif %}">
+  <nav class="navbar">
+    <!-- THIS IS THE "AFTER" CODE -->
+
+<div class="nav-content">
+    <div class="nav-logo-group">
+        <!-- The logo is now the main home link -->
+        <a href="{{ url_for('mental_health_home') if session.mode == 'mental' else url_for('index') }}" class="nav-logo">
+            <img src="https://img.icons8.com/fluency/48/heart-with-pulse.png" alt="HealthCare AI Logo">
+            <span>HealthCare AI</span>
+        </a>
+        <div class="theme-toggle">
+            <a href="{{ url_for('set_mode', mode='physical') }}" class="toggle-physical">Physical</a>
+            <a href="{{ url_for('set_mode', mode='mental') }}" class="toggle-mental">Mental</a>
+        </div>
+    </div>
+    
+    {% if session.get('user_id') %}
+    <div class="nav-links">
+        
+        <!-- These icons appear on ALL pages -->
+        <div class="notification-bell">
+            <a href="#" id="notification-toggle" title="Notifications">
+                <i class="fas fa-bell"></i>
+                <div class="notification-dot"></div>
+            </a>
+            <div class="notification-panel" id="notification-panel">
+                <div class="notification-header">Today's Reminders</div>
+                <div class="notification-list">
+                    {% if site_notifications %}
+                        {% for notif in site_notifications %}
+                        <div class="notification-item">
+                            <i class="fas {% if notif.type == 'appointment' %}fa-calendar-check{% else %}fa-pills{% endif %}"></i>
+                            <div class="notification-content">
+                                <p>{{ notif.message }}</p>
+                                <span class="time">{{ notif.time }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="no-notifications">No reminders for today.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        {% if current_user and current_user.is_admin %}
+        <a href="{{ url_for('admin_dashboard') }}" title="Admin Dashboard"><i class="fas fa-user-shield"></i></a>
+        {% endif %}
+      
+        <!-- Always show the Settings icon -->
+        <a href="{{ url_for('settings') }}" title="Settings"><i class="fas fa-cog"></i></a>
+      
+        <!-- *** THE CONDITIONAL LOGIC IS HERE *** -->
+        <!-- Only show the Logout icon if we are on the 'settings' page -->
+        {% if request.endpoint == 'settings' %}
+            <a href="{{ url_for('logout') }}" title="Logout"><i class="fas fa-sign-out-alt"></i></a>
+        {% endif %}
+      
+    </div>
+    {% else %}
+    <div class="nav-links">
+        <a href="{{ url_for('login') }}" title="Login"><i class="fas fa-sign-in-alt"></i></a>
+    </div>
+    {% endif %}
+</div>
+  </nav>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <div class="toast-container"></div>
+
+    <!-- SCRIPT FOR BASIC SITE FUNCTIONALITY (TOASTS, ETC.) -->
+    <script>
+      function showToast(message, type = 'info', duration = 3000) {
+        const toastContainer = document.querySelector('.toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast alert-${type}`;
+        const iconClass = type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'info-circle';
+        toast.innerHTML = `<i class="fas fa-fw fa-${iconClass}"></i><span>${message}</span>`;
+        toastContainer.appendChild(toast);
+        setTimeout(() => {
+          toast.style.animation = 'fadeOutRight 0.5s forwards';
+          setTimeout(() => toast.remove(), 500);
+        }, duration);
+      }
+      
+      document.addEventListener('DOMContentLoaded', () => {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.style.opacity = "1";
+              entry.target.style.transform = "translateY(0)";
+            }
+          });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.card, .feature-card, .tip-card').forEach(el => observer.observe(el));
+
+        const toggle = document.getElementById('notification-toggle');
+        const panel = document.getElementById('notification-panel');
+        if (toggle && panel) {
+          toggle.addEventListener('click', (e) => {
+              e.preventDefault();
+              panel.classList.toggle('show');
+          });
+          document.addEventListener('click', (e) => {
+              if (!panel.contains(e.target) && !toggle.contains(e.target)) {
+                  panel.classList.remove('show');
+              }
+          });
+        }
+      });
+    </script>
+
+    <!-- This is the placeholder for PAGE-SPECIFIC JavaScript (like charts, accordions) -->
+    {% block extra_js %}{% endblock %}
+
+    <!-- PUSH NOTIFICATION SCRIPT BLOCK - This is the corrected version -->
+    {% if session.get('user_id') and VAPID_PUBLIC_KEY %}
+        <script>
+            // This is a direct test. If you see this in the console, the block is running.
+            console.log("BASE.HTML: Jinja is processing the push script block.");
+            window.vapidPublicKey = "{{ VAPID_PUBLIC_KEY }}";
+        </script>
+        <script src="{{ url_for('static', filename='push-manager.js') }}" defer></script>
+    {% endif %}
+
+  </body>
+</html>

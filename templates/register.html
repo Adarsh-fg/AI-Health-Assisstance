@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container { max-width: 100%; padding: 0 !important; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .auth-container { display: flex; max-width: 1000px; width: 90%; min-height: 600px; background: white; border-radius: 24px; box-shadow: var(--card-shadow-hover); overflow: hidden; animation: fadeInUp 0.6s ease-out; }
+    .auth-branding {
+        flex: 1;
+        background-image: url('https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?q=80&w=1932&auto=format&fit=crop');
+        background-size: cover; background-position: center; position: relative;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        color: white; text-align: center; padding: 2rem;
+    }
+    .auth-branding::before { content: ''; position: absolute; inset: 0; background: var(--gradient-primary); opacity: 0.85; z-index: 1; }
+    .branding-content { position: relative; z-index: 2; }
+    .branding-content .nav-logo { font-size: 2rem; color: white; margin-bottom: 1rem; }
+    .branding-content p { font-size: 1.1rem; opacity: 0.9; }
+    .auth-form { flex: 1.2; padding: 2.5rem; display: flex; flex-direction: column; justify-content: center; overflow-y: auto; }
+    .auth-form h2 { font-size: 2rem; color: var(--primary-dark); margin-bottom: 0.5rem; }
+    .auth-form .form-intro { color: var(--text-light); margin-bottom: 1.5rem; }
+    .input-group { position: relative; margin-bottom: 1rem; }
+    .input-group .form-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-light); transition: color 0.3s ease; }
+    .input-group input, .input-group select { padding-left: 3rem; width: 100%; height: 50px; border: 1px solid var(--border-color); border-radius: 8px; appearance: none; }
+    .input-group input:focus + .form-icon, .input-group select:focus + .form-icon { color: var(--primary-color); }
+    .auth-link { text-align: center; margin-top: 1.5rem; }
+    .auth-link a { color: var(--primary-color); font-weight: 600; text-decoration: none; }
+    @media (max-width: 850px) { .auth-branding { display: none; } .auth-container { max-width: 450px; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-branding">
+        <div class="branding-content">
+            <a href="/home" class="nav-logo"><img src="https://img.icons8.com/fluency/48/heart-with-pulse.png" alt="HealthCare AI Logo">HealthCare AI</a>
+            <p>Join us on the path to better health management and insights.</p>
+        </div>
+    </div>
+    <div class="auth-form">
+        <h2>Create Your Account</h2>
+        <p class="form-intro">Start your personalized health journey today.</p>
+        {% if error %}<div class="alert alert-error">{{ error }}</div>{% endif %}
+        <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+            <input type="hidden" name="timezone" id="timezone">
+            <div class="input-group"><input type="text" id="name" name="name" placeholder="Full Name" required><i class="fas fa-user form-icon"></i></div>
+            <div class="input-group"><input type="email" id="email" name="email" placeholder="Email Address" required><i class="fas fa-envelope form-icon"></i></div>
+            <div class="input-group"><input type="password" id="password" name="password" placeholder="Password" required><i class="fas fa-lock form-icon"></i></div>
+            <div class="input-group"><input type="number" id="age" name="age" placeholder="Age" required><i class="fas fa-birthday-cake form-icon"></i></div>
+            <div class="input-group">
+                <select id="gender" name="gender" required>
+                    <option value="" disabled selected>Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                </select>
+                <i class="fas fa-venus-mars form-icon"></i>
+            </div>
+            <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;">Register</button>
+        </form>
+        <p class="auth-link">Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Set the timezone on form submission
+    document.getElementById('registerForm').addEventListener('submit', function() {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        document.getElementById('timezone').value = timezone;
+    });
+</script>
+{% endblock %}

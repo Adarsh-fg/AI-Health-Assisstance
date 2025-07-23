@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}View User - Admin{% endblock %}
+
+{% block content %}
+<div class="card">
+    <a href="{{ url_for('admin_dashboard') }}" class="back-link"><i class="fas fa-arrow-left"></i> Back to Admin Dashboard</a>
+    <h2 class="page-title"><i class="fas fa-user"></i> User Details: {{ user.name }}</h2>
+    <p>Viewing a snapshot of all data associated with this user.</p>
+</div>
+
+<div class="dashboard-grid">
+    <div class="card">
+        <h4><i class="fas fa-id-card"></i> Profile</h4>
+        <ul>
+            <li><strong>ID:</strong> {{ user.id }}</li>
+            <li><strong>Name:</strong> {{ user.name }}</li>
+            <li><strong>Email:</strong> {{ user.email }}</li>
+            <li><strong>Age:</strong> {{ user.age }}</li>
+            <li><strong>Gender:</strong> {{ user.gender | capitalize }}</li>
+            <li><strong>Weight:</strong> {{ user.weight or 'N/A' }} kg</li>
+            <li><strong>Height:</strong> {{ user.height or 'N/A' }} cm</li>
+            <li><strong>Blood Group:</strong> {{ user.blood_group or 'N/A' }}</li>
+        </ul>
+    </div>
+    <div class="card">
+        <h4><i class="fas fa-shield-alt"></i> Security & Settings</h4>
+        <ul>
+            <li><strong>Role:</strong> {% if user.is_admin %}Admin{% else %}User{% endif %}</li>
+            <li><strong>Joined:</strong> {{ user.created_at }}</li>
+            <li><strong>Timezone:</strong> {{ user.timezone }}</li>
+            <li><strong>Notifications:</strong> {% if user.notifications_enabled %}Enabled{% else %}Disabled{% endif %}</li>
+        </ul>
+    </div>
+</div>
+
+<div class="card">
+    <h4><i class="fas fa-calendar-alt"></i> Appointments ({{ appointments|length }})</h4>
+    {% if appointments %}
+        <ul>
+            {% for item in appointments %}
+                <li>{{ item.date }}: Dr. {{ item.doctor_name }} ({{ item.specialty }})</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No appointments found.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h4><i class="fas fa-pills"></i> Medications ({{ medications|length }})</h4>
+    {% if medications %}
+        <ul>
+            {% for item in medications %}
+                <li>{{ item.name }} ({{ item.dosage }}) - {{ item.frequency }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No medications found.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h4><i class="fas fa-history"></i> Recent History ({{ history|length }} events)</h4>
+     {% if history %}
+        <ul>
+            {% for item in history[:10] %}
+                <li>{{ item.event_timestamp | to_local_time(user.timezone) }}: [{{item.event_type}}] {{ item.description }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No history found for this user.</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .back-link {
+        display: inline-block;
+        margin-bottom: 1.5rem;
+        color: var(--primary-color);
+        font-weight: 500;
+        text-decoration: none;
+    }
+    .back-link i { margin-right: 0.5rem; }
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    .card ul { list-style: none; padding: 0; }
+    .card li { padding: 0.5rem 0; border-bottom: 1px solid var(--border-color); }
+    .card li:last-child { border-bottom: none; }
+</style>
+{% endblock %}

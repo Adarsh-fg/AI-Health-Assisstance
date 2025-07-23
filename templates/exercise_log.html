@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Exercise Log{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="page-header">
+        <h2 class="page-title"><i class="fas fa-history"></i> Exercise Log</h2>
+        <a href="{{ url_for('exercise') }}" class="btn"><i class="fas fa-plus"></i> Log New Workout</a>
+    </div>
+    <p>Here is a history of all your completed workouts. Keep up the great work!</p>
+</div>
+
+<div class="card">
+    {% if logs %}
+    <div class="log-table-container">
+        <table class="log-table">
+            <thead>
+                <tr>
+                    <th>Exercise</th>
+                    <th>Duration</th>
+                    <th>Calories Burned (Est.)</th>
+                    <th>Date & Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.exercise_name }}</td>
+                    <td>
+                        {% set minutes = (log.duration_seconds // 60) | int %}
+                        {% set seconds = log.duration_seconds % 60 %}
+                        {{ "%02d:%02d"|format(minutes, seconds) }}
+                    </td>
+                    <td>{{ "%.1f"|format(log.calories_burned) }} kcal</td>
+                    <td>
+                        {{ log.completed_at | to_local_time(session.user_timezone) }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="no-logs">You haven't logged any exercises yet. Go to the <a href="{{ url_for('exercise') }}">Exercise Library</a> to start a workout!</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+    .log-table-container { overflow-x: auto; }
+    .log-table { width: 100%; border-collapse: collapse; }
+    .log-table th, .log-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        text-align: left;
+    }
+    .log-table th {
+        background-color: var(--background-color);
+        font-weight: 600;
+        color: var(--text-light);
+    }
+    .log-table tbody tr:hover { background-color: #f8fafc; }
+    .no-logs { text-align: center; padding: 2rem; color: var(--text-light); }
+    .no-logs a { color: var(--primary-color); font-weight: 600; }
+</style>
+{% endblock %}

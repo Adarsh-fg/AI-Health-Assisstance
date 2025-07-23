@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Personalized Diet Plan{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2><i class="fas fa-utensils"></i> Your Personalized Diet Plan</h2>
+    <p>Get a diet plan tailored to your profile using AI. This plan is a suggestion to help you achieve your health goals. Remember to consult a professional for medical advice.</p>
+    
+    <div class="actions-container">
+        <form method="POST" action="{{ url_for('diet_plan') }}">
+            <button type="submit" class="btn"><i class="fas fa-robot"></i> Generate New Diet Plan</button>
+        </form>
+    </div>
+</div>
+
+{% if result %}
+<div class="card" style="margin-top: 2rem;">
+    <h3><i class="fas fa-brain"></i> AI-Generated Diet Analysis</h3>
+    <div class="gemini-result">
+        {{ result | safe }}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* New styles for the action buttons */
+.actions-container {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.download-btn {
+    background-image: none;
+    background-color: var(--success-color);
+}
+
+.gemini-result { line-height: 1.7; }
+.gemini-result h4 { 
+    color: var(--primary-color); 
+    margin-top: 1.5rem; 
+    margin-bottom: 0.75rem; 
+    border-bottom: 2px solid var(--border-color); 
+    padding-bottom: 0.5rem;
+}
+.gemini-result ul { 
+    list-style-type: '✓'; 
+    padding-left: 2rem; 
+}
+.gemini-result li { 
+    margin-bottom: 0.5rem; 
+}
+.gemini-result table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+}
+.gemini-result th, .gemini-result td {
+    border: 1px solid var(--border-color);
+    padding: 0.75rem;
+    text-align: left;
+}
+.gemini-result th {
+    background-color: var(--background-color);
+    font-weight: 600;
+}
+</style>
+{% endblock %}

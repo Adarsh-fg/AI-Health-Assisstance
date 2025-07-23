@@ -1,0 +1,9 @@
+Flask==2.3.3 
+google-generativeai==0.8.3 
+werkzeug==3.0.4 
+markdown==3.7 
+pywebpush==2.0.0 
+python-dotenv==1.0.1 
+pytz==2024.2 
+beautifulsoup4==4.12.3 
+markdownify==0.13.1

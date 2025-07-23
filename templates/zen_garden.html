@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Zen Garden{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="page-title"><i class="fas fa-seedling"></i> Digital Zen Garden</h2>
+    <p>Take a quiet moment. Select a tool and draw in the sand to focus your mind. There is no goal but the simple, calming act of creation.</p>
+</div>
+
+<div class="zen-container">
+    <div class="zen-controls">
+        <button class="tool-btn active" data-tool="rake"><i class="fas fa-grip-lines"></i> Rake</button>
+        <button class="tool-btn" data-tool="smooth"><i class="fas fa-wave-square"></i> Smooth</button>
+        <button id="clear-btn" class="tool-btn clear"><i class="fas fa-trash"></i> Clear</button>
+    </div>
+    <canvas id="zen-canvas" width="800" height="500"></canvas>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .zen-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    .zen-controls {
+        display: flex;
+        gap: 1rem;
+        padding: 0.75rem;
+        background-color: var(--background-color);
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+    }
+    .tool-btn {
+        background-color: white;
+        border: 1px solid var(--border-color);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    body.dark-theme .tool-btn {
+        background-color: #334155;
+    }
+    .tool-btn:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+    .tool-btn.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+    #zen-canvas {
+        background-color: #f4f1e9;
+        border: 2px solid #dcd8c9;
+        border-radius: 12px;
+        cursor: crosshair;
+        max-width: 100%;
+        height: auto;
+    }
+    body.dark-theme #zen-canvas {
+        background-color: #4a463a;
+        border-color: #2e2b20;
+    }
+    .audio-card {
+        max-width: 500px;
+        margin: 2rem auto 0;
+        text-align: center;
+    }
+    .audio-player audio {
+        width: 100%;
+        margin-top: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('zen-canvas');
+    const ctx = canvas.getContext('2d');
+    const toolBtns = document.querySelectorAll('.tool-btn[data-tool]');
+    const clearBtn = document.getElementById('clear-btn');
+
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+    let currentTool = 'rake'; // Default tool
+
+    // Set initial sand color
+    ctx.fillStyle = '#f4f1e9';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    function draw(e) {
+        if (!isDrawing) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+        
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+
+        if (currentTool === 'rake') {
+            ctx.strokeStyle = '#dcd8c9';
+            ctx.lineWidth = 2;
+        } else if (currentTool === 'smooth') {
+            ctx.strokeStyle = '#e9e6dd'; // Lighter color for smoothing
+            ctx.lineWidth = 30;
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+
+        [lastX, lastY] = [x, y];
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        [lastX, lastY] = [
+            (e.clientX - rect.left) * (canvas.width / rect.width),
+            (e.clientY - rect.top) * (canvas.height / rect.height)
+        ];
+    });
+
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', () => isDrawing = false);
+    canvas.addEventListener('mouseout', () => isDrawing = false);
+
+    // Tool selection
+    toolBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelector('.tool-btn.active').classList.remove('active');
+            btn.classList.add('active');
+            currentTool = btn.dataset.tool;
+        });
+    });
+
+    // Clear button
+    clearBtn.addEventListener('click', () => {
+        ctx.fillStyle = document.body.classList.contains('dark-theme') ? '#4a463a' : '#f4f1e9';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    });
+});
+</script>
+{% endblock %}

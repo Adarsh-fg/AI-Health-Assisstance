@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Guided Meditations{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="page-title"><i class="fas fa-headphones-alt"></i> Guided Meditations</h2>
+    <p>Find a comfortable and quiet space. Choose a meditation below, close your eyes, and follow the guidance to calm your mind.</p>
+</div>
+
+<div class="meditation-container">
+    <div class="meditation-list">
+        <div class="meditation-item">
+            <div class="item-info">
+                <h4>5-Minute Breathing Meditation</h4>
+                <p>A short session to quickly center yourself and focus on your breath.</p>
+            </div>
+            <button class="play-btn" data-src="{{ url_for('static', filename='audio/5_min.mp3') }}" data-title="5-Minute Breathing Meditation">Play</button>
+        </div>
+        <div class="meditation-item">
+            <div class="item-info">
+                <h4>10-Minute Meditation for Stress</h4>
+                <p>Ease tension and anxiety with this guided session for stress relief.</p>
+            </div>
+            <button class="play-btn" data-src="{{ url_for('static', filename='audio/10_min.mp3') }}" data-title="10-Minute Meditation for Stress">Play</button>
+        </div>
+        <div class="meditation-item">
+            <div class="item-info">
+                <h4>Meditation for Deep Sleep</h4>
+                <p>Prepare your mind for a restful night with this calming sleep meditation.</p>
+            </div>
+            <button class="play-btn" data-src="{{ url_for('static', filename='audio/30min.mp3') }}" data-title="Meditation for Deep Sleep">Play</button>
+        </div>
+    </div>
+
+
+    <!-- THIS IS THE SINGLE, CENTRAL AUDIO PLAYER -->
+    <div class="audio-player-card card">
+        <h4 id="now-playing-title">Select a meditation to begin</h4>
+        <audio id="main-audio-player" controls></audio>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .meditation-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .meditation-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background-color: var(--background-color);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+    }
+    .meditation-item p {
+        color: var(--text-light);
+        font-size: 0.9rem;
+    }
+    .play-btn {
+        padding: 0.6rem 1.2rem;
+        font-weight: 500;
+        border-radius: 8px;
+        cursor: pointer;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        transition: background-color 0.2s;
+    }
+    .play-btn:hover { background-color: var(--primary-dark); }
+    .play-btn.active { background-color: var(--success-color); }
+
+    /* This makes the player stick to the bottom as you scroll */
+    .audio-player-card {
+        position: sticky;
+        bottom: 0;
+        margin-top: 2rem;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        background-color: rgba(255, 255, 255, 0.8);
+        z-index: 10; /* Ensure it stays on top of other content */
+    }
+    body.dark-theme .audio-player-card {
+        background-color: rgba(30, 41, 59, 0.8);
+    }
+    #now-playing-title { margin-bottom: 1rem; }
+    #main-audio-player { width: 100%; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const playButtons = document.querySelectorAll('.play-btn');
+    const audioPlayer = document.getElementById('main-audio-player');
+    const nowPlayingTitle = document.getElementById('now-playing-title');
+
+    playButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const audioSrc = this.dataset.src;
+            const audioTitle = this.dataset.title;
+
+            // --- START: IMPROVED PLAY LOGIC ---
+
+            // Show a "Loading..." state on the button
+            const originalText = this.textContent;
+            this.textContent = 'Loading...';
+            this.disabled = true;
+
+            // Update player and title
+            audioPlayer.src = audioSrc;
+            nowPlayingTitle.textContent = `Now Playing: ${audioTitle}`;
+            
+            // The play() function returns a Promise.
+            const playPromise = audioPlayer.play();
+
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // Autoplay started successfully.
+                    // Visually update which button is "active"
+                    playButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                        btn.textContent = 'Play'; // Reset other buttons
+                        btn.disabled = false;
+                    });
+                    this.classList.add('active');
+                    this.textContent = 'Playing'; // Update current button text
+                    this.disabled = false;
+                })
+                .catch(error => {
+                    // Autoplay was prevented.
+                    console.error("Autoplay was prevented by the browser:", error);
+                    nowPlayingTitle.textContent = "Click the main player's play button to start.";
+                    // Reset the button since autoplay failed
+                    this.textContent = originalText;
+                    this.disabled = false;
+                    // Note: The audio is loaded. The user just needs to click the play icon on the main audio player.
+                });
+            }
+            // --- END: IMPROVED PLAY LOGIC ---
+        });
+    });
+
+    // Also reset button text if the audio ends or is paused
+    audioPlayer.addEventListener('pause', () => {
+        const activeButton = document.querySelector('.play-btn.active');
+        if (activeButton) {
+            activeButton.textContent = 'Play';
+            activeButton.classList.remove('active');
+        }
+    });
+    audioPlayer.addEventListener('ended', () => {
+        const activeButton = document.querySelector('.play-btn.active');
+        if (activeButton) {
+            activeButton.textContent = 'Play';
+            activeButton.classList.remove('active');
+        }
+        nowPlayingTitle.textContent = 'Select a meditation to begin';
+    });
+});
+</script>
+{% endblock %}
